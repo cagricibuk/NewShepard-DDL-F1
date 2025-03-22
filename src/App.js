@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-
+import ThreeDVisualization from './ThreeDVisualization';
 // Önemli olayların listesi
 const events = [
   { name: 'Ignition', time: 0, altitude: 1118 },
@@ -91,7 +91,7 @@ function App() {
   return (
     <div style={{ backgroundColor: '#464747', color: '#FFFFFF', minHeight: '100vh', padding: '20px', fontFamily: 'Arial, sans-serif' }}>
       {/* Navbar Benzeri Üst Kısım */}
-      <div style={{ display: 'flex',justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', padding: '10px', backgroundColor: '#333333', borderRadius: '10px' }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', padding: '10px', backgroundColor: '#333333', borderRadius: '10px' }}>
         <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
           <div style={{ textAlign: 'center' }}>
             <h3 style={{ color: '#0000FF', marginBottom: '5px' }}>Velocity</h3>
@@ -150,7 +150,7 @@ function App() {
                 key={index}
                 style={{
                   position: 'absolute',
-                  bottom: `${((event.time + 50) / 500) * 100}%`, // Olayın zamanına göre konumlandır
+                  bottom: `${((event.time + 47) / 500) * 100}%`, // Olayın zamanına göre konumlandır
                   left: '100%',
                   marginLeft: '10px',
                   whiteSpace: 'nowrap',
@@ -158,106 +158,107 @@ function App() {
                   color: '#FFFFFF',
                 }}
               >
+                {/* Dikey Çizgi */}
+                <div
+                  style={{
+                    position: 'absolute',
+                    left: '-30px',
+                    top: '50%',
+                    height: '1%',
+                    width: '20px',
+                    backgroundColor: '#0000FF',
+                    transform: 'translateY(-50%)',
+                  }}
+                />
                 {event.name} ({event.time}s)
               </div>
             ))}
           </div>
         </div>
 
-        {/* Orta: 3D Simülasyon */}
-        <div style={{ flex: 1, backgroundColor: '#333333', padding: '20px', borderRadius: '10px', position: 'relative' }}>
-         <div style={{ height: '100%', backgroundColor: '#555555', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFFFFF' }}>
-            3D Visualization Placeholder
-          </div>
+{/* Orta: 3D Simülasyon */}
+<div style={{ flex: 2, backgroundColor: '#333333', padding: '20px', borderRadius: '10px', position: 'relative' }}>
+  <div style={{ height: '100%', backgroundColor: '#555555', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFFFFF' }}>
+    <ThreeDVisualization
+      orientationData={simulationData.length > 0 ? simulationData[simulationData.length - 1] : null}
+      altitude={simulationData.length > 0 ? simulationData[simulationData.length - 1].altitude : 0}
+    />
+  </div>
+</div>
 
-          {/* Grafikler (Simülasyon Üzerinde Layer Olarak) */}
-          <div style={{ position: 'absolute', bottom: 0, left: 20, right: 20, backgroundColor: 'rgba(70, 70, 70, 0.8)', padding: '20px', borderRadius: '10px', display: 'flex', gap: '20px' }}>
-            <div style={{ flex: 1 }}>
+        {/* Sağ Taraf: Grafikler */}
+        <div style={{ width: '30%', display: 'flex', flexDirection: 'column', gap: '20px' }}>
+          {/* Altitude vs. Time Grafiği */}
+          <div style={{ flex: 1, backgroundColor: '#333333', padding: '20px', borderRadius: '10px' }}>
             <h3 style={{ color: '#0000FF', marginBottom: '10px' }}>Altitude vs. Time</h3>
-              
-              <ResponsiveContainer width="100%" height={200}>
-                <LineChart
-                  data={simulationData}
-                  margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#555555" />
-                  <XAxis
-                    dataKey="flight_time_seconds"
-                    type="number"
-                    domain={[-50, 450]}
-                    ticks={[-50, 0, 50, 100, 150, 200, 250, 300, 350, 400, 450]}
-                    tick={{ fill: '#FFFFFF' }}
-                    label={{ value: 'Flight Time (seconds)', position: 'insideBottom', offset: -20, fill: '#FFFFFF' }}
-                  />
-                  <YAxis
-                    domain={[0, 100000]}
-                    tick={{ fill: '#FFFFFF' }}
-                    label={{ value: 'Altitude AGL (meters)', angle: -90, position: 'insideLeft', offset: 60, fill: '#FFFFFF' }}
-                  />
-                  <Tooltip contentStyle={{ backgroundColor: '#333333', color: '#FFFFFF' }} />
-                  <Legend wrapperStyle={{ color: '#FFFFFF' }} />
-                  <Line
-                    type="monotone"
-                    dataKey="altitude"
-                    stroke="#82ca9d"
-                    strokeWidth={2}
-                    dot={false}
-                    name="Altitude"
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-            <div style={{ flex: 1 }}>
-              <h3 style={{ color: '#0000FF', marginBottom: '10px' }}>Velocity vs. Time</h3>
-              <ResponsiveContainer width="100%" height={200}>
-                <LineChart
-                  data={simulationData}
-                  margin={{ top: 20, right: 30, left: 20, bottom: 20 }}
-                >
-                  <CartesianGrid strokeDasharray="3 3" stroke="#555555" />
-                  <XAxis
-                    dataKey="flight_time_seconds"
-                    type="number"
-                    domain={[-50, 450]}
-                    ticks={[-50, 0, 50, 100, 150, 200, 250, 300, 350, 400, 450]}
-                    tick={{ fill: '#FFFFFF' }}
-                    label={{ value: 'Flight Time (seconds)', position: 'insideBottom', offset: -20, fill: '#FFFFFF' }}
-                  />
-                  <YAxis
-                    domain={[0, 1000]}
-                    ticks={[0, 500, 1000]}
-                    tick={{ fill: '#FFFFFF' }}
-                    label={{ value: 'Velocity (m/s)', angle: -90, position: 'insideLeft', offset: 60, fill: '#FFFFFF' }}
-                  />
-                  <Tooltip contentStyle={{ backgroundColor: '#333333', color: '#FFFFFF' }} />
-                  <Legend wrapperStyle={{ color: '#FFFFFF' }} />
-                  <Line
-                    type="monotone"
-                    dataKey="velocity"
-                    stroke="#82ca9d"
-                    strokeWidth={2}
-                    dot={false}
-                    name="Velocity"
-                  />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
+            <ResponsiveContainer width="100%" height={200}>
+              <LineChart
+                data={simulationData}
+                margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#555555" />
+                <XAxis
+                  dataKey="flight_time_seconds"
+                  type="number"
+                  domain={[-50, 450]}
+                  ticks={[-50, 0, 50, 100, 150, 200, 250, 300, 350, 400, 450]}
+                  tick={{ fill: '#FFFFFF' }}
+                  label={{ value: 'Flight Time (seconds)', position: 'insideBottom', offset: -20, fill: '#FFFFFF' }}
+                />
+                <YAxis
+                  domain={[0, 110000]}
+                  tick={{ fill: '#FFFFFF' }}
+                  label={{ value: 'Altitude AGL (meters)', angle: -90, position: 'insideLeft', offset: 60, fill: '#FFFFFF' }}
+                />
+                <Tooltip contentStyle={{ backgroundColor: '#333333', color: '#FFFFFF' }} />
+                <Legend wrapperStyle={{ color: '#FFFFFF' }} />
+                <Line
+                  type="monotone"
+                  dataKey="altitude"
+                  stroke="#82ca9d"
+                  strokeWidth={2}
+                  dot={false}
+                  name="Altitude"
+                />
+              </LineChart>
+            </ResponsiveContainer>
           </div>
-        </div>
 
-        {/* Sağ Taraf: Rotasyon Pencereleri */}
-        <div style={{ width: '20%', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          <div style={{ backgroundColor: '#333333', padding: '20px', borderRadius: '10px' }}>
-            <h3 style={{ color: '#0000FF', marginBottom: '10px' }}>Craft Orientation</h3>
-            <div style={{ height: '30vh', backgroundColor: '#555555', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFFFFF' }}>
-              Orientation Placeholder
-            </div>
-          </div>
-          <div style={{ backgroundColor: '#333333', padding: '20px', borderRadius: '10px' }}>
-            <h3 style={{ color: '#0000FF', marginBottom: '10px' }}>Rotation</h3>
-            <div style={{ height: '30vh', backgroundColor: '#555555', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFFFFF' }}>
-              Rotation Placeholder
-            </div>
+          {/* Velocity vs. Time Grafiği */}
+          <div style={{ flex: 1, backgroundColor: '#333333', padding: '20px', borderRadius: '10px' }}>
+            <h3 style={{ color: '#0000FF', marginBottom: '10px' }}>Velocity vs. Time</h3>
+            <ResponsiveContainer width="100%" height={200}>
+              <LineChart
+                data={simulationData}
+                margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
+              >
+                <CartesianGrid strokeDasharray="3 3" stroke="#555555" />
+                <XAxis
+                  dataKey="flight_time_seconds"
+                  type="number"
+                  domain={[-50, 450]}
+                  ticks={[-50, 0, 50, 100, 150, 200, 250, 300, 350, 400, 450]}
+                  tick={{ fill: '#FFFFFF' }}
+                  label={{ value: 'Flight Time (seconds)', position: 'insideBottom', offset: -20, fill: '#FFFFFF' }}
+                />
+                <YAxis
+                  domain={[0, 1000]}
+                  ticks={[0, 500, 1000]}
+                  tick={{ fill: '#FFFFFF' }}
+                  label={{ value: 'Velocity (m/s)', angle: -90, position: 'insideLeft', offset: 60, fill: '#FFFFFF' }}
+                />
+                <Tooltip contentStyle={{ backgroundColor: '#333333', color: '#FFFFFF' }} />
+                <Legend wrapperStyle={{ color: '#FFFFFF' }} />
+                <Line
+                  type="monotone"
+                  dataKey="velocity"
+                  stroke="#82ca9d"
+                  strokeWidth={2}
+                  dot={false}
+                  name="Velocity"
+                />
+              </LineChart>
+            </ResponsiveContainer>
           </div>
         </div>
       </div>
