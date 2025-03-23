@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import ThreeDVisualization from './ThreeDVisualization';
+import P5Sketch from './P5Sketch';
 
 // Önemli olayların listesi
 const events = [
@@ -42,23 +42,23 @@ function App() {
     if (!startTimeRef.current) {
       startTimeRef.current = timestamp; // Simülasyon başlangıç zamanını kaydet
     }
-
+  
     // Geçen süreyi hesapla (milisaniye cinsinden)
     const elapsedTime = elapsedTimeRef.current + (timestamp - startTimeRef.current) * simulationSpeed;
-
+  
     // Şu anki zamanı hesapla (saniye cinsinden)
     const currentTime = -50 + elapsedTime / 1000;
-
+  
     // Şu anki zamanı tam saniyeye yuvarla
-    const currentSecond = Math.floor(currentTime);
-
+    const currentSecond = Math.floor(currentTime); // currentSecond tanımlandı
+  
     // Geri sayımı güncelle (T - X formatında)
     setCountdown(`T - ${Math.abs(currentSecond)}`);
-
+  
     // Progress bar doluluk oranını güncelle
     const progressPercentage = ((currentTime + 50) / 500) * 100; // -50 ile 450 arasında
     setProgress(progressPercentage);
-
+  
     // Şu anki zaman aralığındaki verileri bul
     while (
       currentIndexRef.current < flightData.length &&
@@ -67,7 +67,7 @@ function App() {
       setSimulationData((prevData) => [...prevData, flightData[currentIndexRef.current]]);
       currentIndexRef.current += 1;
     }
-
+  
     // Önemli eventleri kontrol et
     const activeEvent = events.find((event) => Math.abs(event.time - currentTime) < 1); // 1 saniye tolerans
     if (activeEvent && currentEvent?.name !== activeEvent.name) {
@@ -80,7 +80,7 @@ function App() {
         setCurrentEvent(null);
       }, 5000); // 5 saniye
     }
-
+  
     // Simülasyon devam ediyorsa, bir sonraki kareyi planla
     if (currentTime <= 450) {
       requestRef.current = requestAnimationFrame(updateSimulation);
@@ -88,6 +88,7 @@ function App() {
       setIsSimulationRunning(false); // Simülasyonu durdur
     }
   };
+  
 
   useEffect(() => {
     if (isSimulationRunning) {
@@ -260,11 +261,9 @@ function App() {
           </div>
         </div>
 
-        {/* Orta: 3D Simülasyon (Şimdilik Boş) */}
+        {/* Orta: 3D Simülasyon (P5.js Animasyonu) */}
         <div style={{ flex: 2, backgroundColor: '#333333', padding: '20px', borderRadius: '10px', position: 'relative' }}>
-          <div style={{ height: '100%', backgroundColor: '#555555', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFFFFF' }}>
-            <div>3D Simülasyon Alanı (Şimdilik Boş)</div>
-          </div>
+          <P5Sketch altitude={currentAltitude} velocity={currentVelocity} isSimulationRunning={isSimulationRunning} />
         </div>
 
         {/* Sağ Taraf: Grafikler */}
