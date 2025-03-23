@@ -1,5 +1,7 @@
-import React, { useRef, useEffect } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import * as THREE from 'three';
+import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader';
+import { normalize } from 'three/src/math/MathUtils.js';
 
 // Global variables for the shared WebGL context
 let scene = null;
@@ -11,6 +13,7 @@ let animationFrameId = null; // Animasyon frame ID'sini saklamak için
 
 const ThreeDVisualization = ({ altitude }) => {
   const mountRef = useRef(null);
+  const [modelLoaded, setModelLoaded] = useState(false); // Modelin yüklenip yüklenmediğini takip etmek için state
   const initialAltitude = 1126; // Başlangıç yüksekliği (ASL)
 
   useEffect(() => {
@@ -45,12 +48,17 @@ const ThreeDVisualization = ({ altitude }) => {
       ground.position.y = -10; // Yeryüzünü aşağıya taşı
       scene.add(ground);
 
-      // Roket temsili (koni)
-      const rocketGeometry = new THREE.ConeGeometry(1, 5, 32);
-      const rocketMaterial = new THREE.MeshPhongMaterial({ color: 0xff0000 });
-      rocket = new THREE.Mesh(rocketGeometry, rocketMaterial);
-      rocket.position.y = 0; // Roketin başlangıç yüksekliği
-      scene.add(rocket);
+      // Roket modelini yükle
+      const loader = new GLTFLoader();
+      loader.load('/models/rocket.glb', (gltf) => {
+        rocket = gltf.scene;
+        rocket.position.y = 0; // Roketin başlangıç yüksekliği
+        rocket.scale.set(3, 3, 3); // Modelin boyutunu ayarla (isteğe bağlı)
+        scene.add(rocket);
+        setModelLoaded(true); // Model yüklendiğinde state'i güncelle
+      }, undefined, (error) => {
+        console.error('An error happened while loading the rocket model:', error);
+      });
     }
 
     // Animasyon fonksiyonu
@@ -73,7 +81,7 @@ const ThreeDVisualization = ({ altitude }) => {
       // Kamera pozisyonunu roketin yüksekliğine göre ayarla
       if (camera) {
         camera.position.y = 10 + (normalizedAltitude || 0); // Kamera roketi takip etsin
-        camera.lookAt(rocket.position); // Kamera roketi takip etsin
+        camera.lookAt(rocket ? rocket.position : normalizedAltitude); // Roket yoksa (0, 0, 0) noktasına bak
       }
 
       // Render the scene
@@ -103,7 +111,7 @@ const ThreeDVisualization = ({ altitude }) => {
         ground = null;
       }
     };
-  }, [altitude]);
+  }, [altitude, modelLoaded]); // modelLoaded state'ini dependency array'e ekle
 
   return <div ref={mountRef} style={{ width: '100%', height: '100%' }} />;
 };

@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import ThreeDVisualization from './ThreeDVisualization';
+
 // Önemli olayların listesi
 const events = [
   { name: 'Ignition', time: 0, altitude: 1118 },
@@ -19,9 +20,13 @@ function App() {
   const [isSimulationRunning, setIsSimulationRunning] = useState(false); // Simülasyon durumu
   const [countdown, setCountdown] = useState('T - 50'); // Geri sayım (T - X formatında)
   const [progress, setProgress] = useState(0); // Progress bar doluluk oranı
+  const [currentEvent, setCurrentEvent] = useState(null); // Şu anki event
+  const [simulationSpeed, setSimulationSpeed] = useState(1); // Simülasyon hızı (1x, 2x, 4x)
   const currentIndexRef = useRef(0); // Mevcut veri indeksi (useRef kullanıyoruz)
   const startTimeRef = useRef(null); // Simülasyon başlangıç zamanı (useRef kullanıyoruz)
   const requestRef = useRef(); // requestAnimationFrame referansı
+  const eventTimeoutRef = useRef(); // Event zaman aşımı referansı
+  const elapsedTimeRef = useRef(0); // Geçen süreyi saklamak için (useRef kullanıyoruz)
 
   useEffect(() => {
     // JSON verisini yükle
@@ -39,7 +44,7 @@ function App() {
     }
 
     // Geçen süreyi hesapla (milisaniye cinsinden)
-    const elapsedTime = timestamp - startTimeRef.current;
+    const elapsedTime = elapsedTimeRef.current + (timestamp - startTimeRef.current) * simulationSpeed;
 
     // Şu anki zamanı hesapla (saniye cinsinden)
     const currentTime = -50 + elapsedTime / 1000;
@@ -63,6 +68,19 @@ function App() {
       currentIndexRef.current += 1;
     }
 
+    // Önemli eventleri kontrol et
+    const activeEvent = events.find((event) => Math.abs(event.time - currentTime) < 1); // 1 saniye tolerans
+    if (activeEvent && currentEvent?.name !== activeEvent.name) {
+      setCurrentEvent(activeEvent);
+      // 5 saniye sonra event ismini kaldır
+      if (eventTimeoutRef.current) {
+        clearTimeout(eventTimeoutRef.current);
+      }
+      eventTimeoutRef.current = setTimeout(() => {
+        setCurrentEvent(null);
+      }, 5000); // 5 saniye
+    }
+
     // Simülasyon devam ediyorsa, bir sonraki kareyi planla
     if (currentTime <= 450) {
       requestRef.current = requestAnimationFrame(updateSimulation);
@@ -74,6 +92,7 @@ function App() {
   useEffect(() => {
     if (isSimulationRunning) {
       // Simülasyon başlatıldığında, requestAnimationFrame ile güncellemeleri başlat
+      startTimeRef.current = null; // Başlangıç zamanını sıfırla
       requestRef.current = requestAnimationFrame(updateSimulation);
     } else {
       // Simülasyon durdurulduğunda, requestAnimationFrame'i temizle
@@ -82,7 +101,7 @@ function App() {
 
     // Temizleme fonksiyonu
     return () => cancelAnimationFrame(requestRef.current);
-  }, [isSimulationRunning]);
+  }, [isSimulationRunning, simulationSpeed]);
 
   // Velocity ve Altitude değerlerini hesapla
   const currentVelocity = simulationData.length > 0 ? simulationData[simulationData.length - 1].velocity : 0;
@@ -105,29 +124,94 @@ function App() {
             <h3 style={{ color: '#0000FF', marginBottom: '5px' }}>Timer</h3>
             <div style={{ fontSize: '20px', color: '#FFFFFF' }}>{countdown}</div>
           </div>
+          {currentEvent && (
+            <div style={{ textAlign: 'center', marginLeft: '20px' }}>
+              <h3 style={{ color: '#FF0000', marginBottom: '5px' }}>Event</h3>
+              <div style={{ fontSize: '20px', color: '#FFFFFF' }}>{currentEvent.name}</div>
+            </div>
+          )}
         </div>
-        <button
-          onClick={() => {
-            setIsSimulationRunning(true); // Simülasyonu başlat
-            setSimulationData([]); // Verileri sıfırla
-            currentIndexRef.current = 0; // İndeksi sıfırla
-            startTimeRef.current = null; // Başlangıç zamanını sıfırla
-            setCountdown('T - 50'); // Geri sayımı sıfırla
-            setProgress(0); // Progress bar'ı sıfırla
-          }}
-          disabled={isSimulationRunning} // Simülasyon çalışırken butonu devre dışı bırak
-          style={{
-            padding: '10px 20px',
-            fontSize: '16px',
-            backgroundColor: '#0000FF',
-            color: '#FFFFFF',
-            border: 'none',
-            borderRadius: '5px',
-            cursor: 'pointer',
-          }}
-        >
-          {isSimulationRunning ? 'Simülasyon Çalışıyor...' : 'Simülasyonu Başlat'}
-        </button>
+        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
+          {/* Simülasyon Hızı Butonları */}
+          <button
+            onClick={() => {
+              setSimulationSpeed(1);
+              elapsedTimeRef.current += (performance.now() - startTimeRef.current) * simulationSpeed;
+              startTimeRef.current = performance.now();
+            }}
+            style={{
+              padding: '10px 20px',
+              fontSize: '16px',
+              backgroundColor: simulationSpeed === 1 ? '#0000FF' : '#555555',
+              color: '#FFFFFF',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer',
+            }}
+          >
+            1x
+          </button>
+          <button
+            onClick={() => {
+              setSimulationSpeed(2);
+              elapsedTimeRef.current += (performance.now() - startTimeRef.current) * simulationSpeed;
+              startTimeRef.current = performance.now();
+            }}
+            style={{
+              padding: '10px 20px',
+              fontSize: '16px',
+              backgroundColor: simulationSpeed === 2 ? '#0000FF' : '#555555',
+              color: '#FFFFFF',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer',
+            }}
+          >
+            2x
+          </button>
+          <button
+            onClick={() => {
+              setSimulationSpeed(4);
+              elapsedTimeRef.current += (performance.now() - startTimeRef.current) * simulationSpeed;
+              startTimeRef.current = performance.now();
+            }}
+            style={{
+              padding: '10px 20px',
+              fontSize: '16px',
+              backgroundColor: simulationSpeed === 4 ? '#0000FF' : '#555555',
+              color: '#FFFFFF',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer',
+            }}
+          >
+            4x
+          </button>
+          <button
+            onClick={() => {
+              setIsSimulationRunning(true); // Simülasyonu başlat
+              setSimulationData([]); // Verileri sıfırla
+              currentIndexRef.current = 0; // İndeksi sıfırla
+              startTimeRef.current = null; // Başlangıç zamanını sıfırla
+              elapsedTimeRef.current = 0; // Geçen süreyi sıfırla
+              setCountdown('T - 50'); // Geri sayımı sıfırla
+              setProgress(0); // Progress bar'ı sıfırla
+              setCurrentEvent(null); // Event'i sıfırla
+            }}
+            disabled={isSimulationRunning} // Simülasyon çalışırken butonu devre dışı bırak
+            style={{
+              padding: '10px 20px',
+              fontSize: '16px',
+              backgroundColor: '#0000FF',
+              color: '#FFFFFF',
+              border: 'none',
+              borderRadius: '5px',
+              cursor: 'pointer',
+            }}
+          >
+            {isSimulationRunning ? 'Simülasyon Çalışıyor...' : 'Simülasyonu Başlat'}
+          </button>
+        </div>
       </div>
 
       {/* Ana Yerleşim */}
@@ -176,15 +260,12 @@ function App() {
           </div>
         </div>
 
-{/* Orta: 3D Simülasyon */}
-<div style={{ flex: 2, backgroundColor: '#333333', padding: '20px', borderRadius: '10px', position: 'relative' }}>
-  <div style={{ height: '100%', backgroundColor: '#555555', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFFFFF' }}>
-    <ThreeDVisualization
-      orientationData={simulationData.length > 0 ? simulationData[simulationData.length - 1] : null}
-      altitude={simulationData.length > 0 ? simulationData[simulationData.length - 1].altitude : 0}
-    />
-  </div>
-</div>
+        {/* Orta: 3D Simülasyon (Şimdilik Boş) */}
+        <div style={{ flex: 2, backgroundColor: '#333333', padding: '20px', borderRadius: '10px', position: 'relative' }}>
+          <div style={{ height: '100%', backgroundColor: '#555555', borderRadius: '10px', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#FFFFFF' }}>
+            <div>3D Simülasyon Alanı (Şimdilik Boş)</div>
+          </div>
+        </div>
 
         {/* Sağ Taraf: Grafikler */}
         <div style={{ width: '30%', display: 'flex', flexDirection: 'column', gap: '20px' }}>
