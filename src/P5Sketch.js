@@ -6,9 +6,6 @@ const P5Sketch = ({ altitude, velocity, isSimulationRunning }) => {
 
   useEffect(() => {
     const sketch = (p) => {
-      let rocketY = 0;
-      let rocketV = 0;
-      const rocketA = 0.02; // ivme (roket motoru gücü)
       const maxAltitude = 100000; // 100 km
       const visibleRange = 5000; // 5 km'lik görüntü alanı
       let pixelsPerMeter;
@@ -21,16 +18,9 @@ const P5Sketch = ({ altitude, velocity, isSimulationRunning }) => {
       p.draw = () => {
         p.background(0);
 
-        if (isSimulationRunning) {
-          // Roket fiziği
-          rocketV += rocketA;
-          rocketY += rocketV;
-
-          // Yükseklik ve hızı React state'ine göre güncelle
-          if (rocketY > maxAltitude) {
-            rocketY = maxAltitude; // Maksimum yüksekliği sınırla
-          }
-        }
+        // Roketin yüksekliğini ve hızını React state'inden al
+        let rocketY = altitude; // Yükseklik
+        let rocketV = velocity; // Hız
 
         // Kameranın takip edeceği offset (roket ekranın ortasında olacak şekilde)
         let cameraCenterY = rocketY;
@@ -38,7 +28,7 @@ const P5Sketch = ({ altitude, velocity, isSimulationRunning }) => {
         drawRuler(cameraCenterY);
         drawRocket(cameraCenterY);
 
-        // Yükseklik bilgisi
+        // Yükseklik ve hız bilgisi
         p.fill(255);
         p.noStroke();
         p.textSize(16);
@@ -74,7 +64,7 @@ const P5Sketch = ({ altitude, velocity, isSimulationRunning }) => {
       };
 
       const drawRocket = (cameraCenterY) => {
-        let rocketScreenY = p.map(rocketY, cameraCenterY - visibleRange / 2, cameraCenterY + visibleRange / 2, p.height, 0);
+        let rocketScreenY = p.map(altitude, cameraCenterY - visibleRange / 2, cameraCenterY + visibleRange / 2, p.height, 0);
         p.fill(255, 0, 0);
         p.noStroke();
         p.rect(p.width / 2 - 5, rocketScreenY - 30, 10, 30); // gövde
@@ -96,7 +86,7 @@ const P5Sketch = ({ altitude, velocity, isSimulationRunning }) => {
     return () => {
       p5Instance.remove();
     };
-  }, [isSimulationRunning]);
+  }, [altitude, velocity, isSimulationRunning]); // Prop'lar değiştiğinde yeniden render et
 
   return <div ref={sketchRef}></div>;
 };
