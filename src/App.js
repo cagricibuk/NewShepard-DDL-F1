@@ -483,10 +483,13 @@ function App() {
             </Grid>
 
             {/* 3D Visualization */}
-            <Grid item xs={7}>
+            <Grid item xs={3}>
               <Paper elevation={3} sx={{
                 height: '100%',
+
+                backgroundColor: blueOriginColors.darkGray,
                 p: 0,
+                marginLeft: '3vw',
                 overflow: 'hidden',
                 position: 'relative',
                 '&:before': {
@@ -497,93 +500,100 @@ function App() {
                   pointerEvents: 'none'
                 }
               }}>
-                {/* 3D Visualization */}
-                <Grid item xs={7}>
-                  <Paper elevation={3} sx={{
-                    height: '100%',
-                    p: 0,
-                    overflow: 'hidden',
-                    position: 'relative',
-                    '&:before': {
-                      content: '""',
-                      position: 'absolute',
-                      inset: 0,
-                      background: `linear-gradient(135deg, rgba(11,61,145,0.1) 0%, rgba(0,0,0,0) 100%)`,
-                      pointerEvents: 'none'
-                    }
-                  }}>
-                    <P5Sketch
-                      altitude={currentAltitude}
-                      velocity={currentVelocity}
-                      isSimulationRunning={isSimulationRunning}
-                      elapsedTime={CurrentTimeRef.current}
-                      rocketImages={rocketImages}
-                    />
-
-                    {/* Optimize Edilmiş Kare Çerçeveler */}
-                    <Box sx={{
-                      position: 'absolute',
-                      top: 16,
-                      right: 16,
-                      display: 'flex',
-                      flexDirection: 'column',
-                      gap: 2,
-                      zIndex: 1,
-                      width: '22%', // Konteyner genişliği
-                      maxWidth: 150 // Maksimum genişlik
-                    }}>
-                      <Box sx={{
-                        width: '100%',
-                        aspectRatio: '1/1', // Kare formunu koru
-                        border: `1.5px solid ${blueOriginColors.mediumBlue}`,
-                        borderRadius: '4px',
-                        backgroundColor: 'rgba(11, 61, 145, 0.2)',
-                        backdropFilter: 'blur(2px)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-                        '&:hover': {
-                          borderColor: blueOriginColors.lightBlue
-                        }
-                      }}>
-                        {/* 1. Çerçeve İçeriği */}
-                      </Box>
-
-                      <Box sx={{
-                        width: '100%',
-                        aspectRatio: '1/1', // Kare formunu koru
-                        border: `1.5px solid ${blueOriginColors.mediumBlue}`,
-                        borderRadius: '4px',
-                        backgroundColor: 'rgba(11, 61, 145, 0.2)',
-                        backdropFilter: 'blur(2px)',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
-                        '&:hover': {
-                          borderColor: blueOriginColors.lightBlue
-                        }
-                      }}>
-                        {/* 2. Çerçeve İçeriği */}
-                      </Box>
-                    </Box>
-                  </Paper>
-                </Grid>
+                <P5Sketch
+                  altitude={currentAltitude}
+                  velocity={currentVelocity}
+                  isSimulationRunning={isSimulationRunning}
+                  elapsedTime={CurrentTimeRef.current}
+                  rocketImages={rocketImages}
+                />
               </Paper>
             </Grid>
 
-            {/* Charts */}
-            <Grid item xs={4} >
-              <Grid container direction="column" spacing={2} sx={{ height: '100%' }}>
-                <Grid item xs={6} >
-                  <Paper elevation={3} sx={{ height: '100%', p: 1.5 }}>
-                    <Typography variant="h6" gutterBottom color="primary" sx={{ mb: 1 }}>
+            {/* Visualization Windows - Stacked Vertically */}
+            <Grid item xs={2} >
+              <Grid container direction="column" height='100%' spacing={2} >
+                {/* Top Visualization Window */}
+                <Grid item xs={6}>
+                  <Paper elevation={3} sx={{
+                    height: '99%',
+                    p: 2,
+                    backgroundColor: blueOriginColors.darkGray,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    color: blueOriginColors.lightBlue,
+                   
+                  }}>
+                    <Typography variant="h6" color="White" sx={{ mb: 2 }}>
+                      LIDAR
+                    </Typography>
+                    <Box sx={{
+                      width: '100%',
+                      height: '100%',
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center'
+                    }}>
+                      {/* Placeholder for LIDAR visualization */}
+                      <Typography variant="body2" color="textSecondary">
+                        LIDAR visualization will appear here
+                      </Typography>
+                    </Box>
+                  </Paper>
+                </Grid>
+
+                {/* Bottom Visualization Window */}
+                <Grid item xs={6}>
+                  <Paper elevation={3} sx={{
+                    height: '99%',
+                    p: 2,
+                    backgroundColor: blueOriginColors.darkGray,
+                    display: 'flex',
+                    flexDirection: 'column',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    color: blueOriginColors.lightBlue,
+                    
+                  }}>
+                    <Typography variant="h6" color="White" sx={{ mb: 2 }}>
+                      ORIENTATION
+                    </Typography>
+                    <Box sx={{
+                      width: '100%',
+                      height: '100%',
+                      display: 'flex',
+                      justifyContent: 'center',
+                      alignItems: 'center'
+                    }}>
+                      {/* Placeholder for orientation visualization */}
+                      <Typography variant="body2" color="textSecondary">
+                        Orientation visualization will appear here
+                      </Typography>
+                    </Box>
+                  </Paper>
+                </Grid>
+              </Grid>
+            </Grid>
+            {/* ikinci sutun*/}
+            {/* Visualization Windows - Stacked Vertically */}
+            <Grid item xs={2} >
+              <Grid container direction="column" height='100%' spacing={2} >
+                {/* Top Visualization Window */}
+                <Grid item xs={4} width={950}>
+                  <Paper elevation={3} sx={{
+                    height: '38.5vh',
+                    p: 1.5,
+                    backgroundColor: blueOriginColors.darkGray,
+
+                  }}>
+                    <Typography variant="h6" gutterBottom color={blueOriginColors.white} sx={{ mb: 1 }}>
                       ALTITUDE vs TIME
                     </Typography>
-                    <Box sx={{ height: 'calc(100% - 36px)' }} >
-                      <ResponsiveContainer width="100%" height={250} >
-                        <LineChart data={simulationData} >
+                    <Box height={250} sx={{ height: 'calc(100% - 36px)' }}>
+                      <ResponsiveContainer width="100%" height="100%">
+                        <LineChart data={simulationData}>
                           <CartesianGrid strokeDasharray="3 3" stroke={blueOriginColors.darkBlue} />
                           <XAxis
                             dataKey="flight_time_seconds"
@@ -614,16 +624,15 @@ function App() {
                               position: 'insideLeft',
                               offset: 10,
                               fill: blueOriginColors.lightBlue,
-
                               fontSize: '0.7rem'
                             }}
                           />
                           <Tooltip
                             contentStyle={{
-                              background: blueOriginColors.white,
+                              background: blueOriginColors.darkGray,
                               borderColor: blueOriginColors.mediumBlue,
                               borderRadius: '4px',
-                              boxShadow: `0 0 8px ${blueOriginColors.darkBlue}`
+                              color: blueOriginColors.lightBlue
                             }}
                           />
                           <Line
@@ -640,13 +649,20 @@ function App() {
                     </Box>
                   </Paper>
                 </Grid>
+
+                {/* Bottom Visualization Window */}
                 <Grid item xs={6}>
-                  <Paper elevation={3} sx={{ height: '100%', p: 1.5 }}>
-                    <Typography variant="h6" gutterBottom color="primary" sx={{ mb: 1 }}>
+                  <Paper elevation={3} sx={{
+                    height: '100%',
+                    p: 1.5,
+                    backgroundColor: blueOriginColors.darkGray,
+
+                  }}>
+                    <Typography variant="h6" gutterBottom color={blueOriginColors.white} sx={{ mb: 1 }}>
                       VELOCITY vs TIME
                     </Typography>
                     <Box sx={{ height: 'calc(100% - 36px)' }}>
-                      <ResponsiveContainer width="100%" height={250}>
+                      <ResponsiveContainer width="100%" height="100%">
                         <LineChart data={simulationData}>
                           <CartesianGrid strokeDasharray="3 3" stroke={blueOriginColors.darkBlue} />
                           <XAxis
@@ -684,10 +700,10 @@ function App() {
                           />
                           <Tooltip
                             contentStyle={{
-                              background: blueOriginColors.white,
+                              background: blueOriginColors.darkGray,
                               borderColor: blueOriginColors.mediumBlue,
                               borderRadius: '4px',
-                              boxShadow: `0 0 8px ${blueOriginColors.darkBlue}`
+                              color: blueOriginColors.lightBlue
                             }}
                           />
                           <Line
@@ -706,6 +722,7 @@ function App() {
                 </Grid>
               </Grid>
             </Grid>
+
           </Grid>
         </Container>
       </Box>

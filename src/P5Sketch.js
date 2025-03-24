@@ -6,7 +6,7 @@ const P5Sketch = ({ altitude, velocity, isSimulationRunning, elapsedTime, rocket
 
   useEffect(() => {
     const sketch = (p) => {
-      const maxAltitude = 100000;
+      const maxAltitude = 110000;
       const visibleRange = 2000;
       let pixelsPerMeter;
 
