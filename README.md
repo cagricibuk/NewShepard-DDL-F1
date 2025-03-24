@@ -1,48 +1,48 @@
 # 🚀 Blue Origin BODDL-TP Flight 1 Visualization
 
-Bu proje, **Blue Origin Deorbit, Descent, and Landing Tipping Point (BODDL-TP) Game Changing Development (GCD) Programı** kapsamında elde edilen uçuş verilerini kullanarak geliştirilmiş, uçuşu görsel olarak izlemeye ve analiz etmeye olanak sağlayan interaktif bir simülasyon arayüzüdür.
+This project is an interactive simulation interface developed using flight data from the **Blue Origin Deorbit, Descent, and Landing Tipping Point (BODDL-TP) Game Changing Development (GCD) Program**. It visualizes and analyzes the flight data, providing insights into key flight events and metrics.
 
-## ✨ Proje Özellikleri
-- **React** ile geliştirilmiş modern ve responsive frontend
-- **Material UI** kütüphanesi desteğiyle şık ve kullanışlı kullanıcı arayüzü
-- **p5.js** kullanılarak oluşturulmuş 3D uçuş simülasyonu
-- Hız–Zaman ve İrtifa–Zaman grafik gösterimleri
-- Dikey **Flight Events Bar** ile uçuş boyunca kritik olayların görsel takibi
-- Python scriptleri ile veri ön işleme ve uçuş zamanı senkronizasyonu
+## ✨ Project Features
+- Frontend developed with **React** for a modern and responsive UI
+- User-friendly UI supported by the **Material UI** library
+- 3D flight simulation created with **p5.js**
+- Graphs showing Speed–Time and Altitude–Time
+- Vertical **Flight Events Bar** to visualize key flight events during the mission
+- Python scripts to preprocess and synchronize the flight data for easy consumption by the app
 
-## 📁 Kullanılan Veriler
-Veriler, NASA ve Blue Origin tarafından sağlanan, Flight 1 sırasında kaydedilmiş:
-- IMU verileri (delta velocity, delta angle)
-- Truth verileri (pozisyon, hız ve yönelim)
-- Commercial LiDAR verileri (beam hatları boyunca hız ve mesafe ölçümleri)
-- Önemli uçuş olaylarının zaman damgaları (liftoff, MECO, apogee, vb.)
+## 📁 Used Data
+The data used in this project was recorded during Flight 1 and includes:
+- IMU data (delta velocity, delta angle)
+- Truth data (position, velocity, and orientation)
+- Commercial LiDAR data (range and Doppler velocity along beam lines)
+- Time-stamped key flight events (liftoff, MECO, apogee, etc.)
 
-## 🛠️ Kullanılan Teknolojiler
-| Teknoloji            | Kullanım Amacı                         |
-|----------------------|-----------------------------------------|
-| **React**            | Front-end geliştirme                   |
-| **Material UI**      | UI komponentleri ve tasarım desteği    |
-| **p5.js**            | 3D simülasyon ve animasyon             |
-| **Python**           | Veri düzenleme ve ön işleme            |
-| **Chart.js**         | Zaman serisi grafikler için     |
+## 🛠️ Technologies Used
+| Technology            | Purpose                                |
+|-----------------------|----------------------------------------|
+| **React**             | Frontend development                   |
+| **Material UI**       | UI components and design support       |
+| **p5.js**             | 3D simulation and animation            |
+| **Python**            | Data preprocessing and synchronization |
+| **Chart.js** _(optional)_ | Time-series graphs                    |
 
-## 📌 Geliştirme Planları
+## 📸 Screenshots
 
-Bu proje üzerinde yapılacak geliştirmeler ve iyileştirmeler aşağıda sıralanmıştır:
 
-- **Commercial LiDAR ve Yönelim Verileri**: Bu veriler kullanılarak daha detaylı uçuş ortamları oluşturulabilir. LiDAR verileri ile gerçek zamanlı zemin analizleri ve yönelim verileriyle uçuşun doğruluğu artırılabilir.
-  
-- **Manuel Olay Ekleme ve Oynatma Kontrol Seçenekleri**: Kullanıcıların uçuş sırasında manuel olarak olayları ekleyebilmesi veya belirli bir zaman dilimini oynatabilmesi sağlanabilir. Bu, uçuş simülasyonlarının daha etkileşimli ve eğitici olmasına yardımcı olabilir.
+## 📌 Development Plans
 
-- **İniş Bölgesi Harita Gösterimi**: İniş bölgesi ve diğer önemli noktalar harita üzerinde görselleştirilebilir. Bu sayede uçuş rotası ve iniş bölgesi arasındaki ilişki daha net anlaşılabilir.
+The following features and improvements are planned for future development:
 
-- **Gerçek Zamanlı Uçuş Takibi**: Verilerin gerçek zamanlı olarak senkronize edilmesi ve anlık uçuş parametrelerinin görüntülenmesi sağlanabilir. Bu, özellikle eğitim ve simülasyon amaçlı uçuşlarda oldukça faydalı olacaktır.
+- **Commercial LiDAR and Orientation Data**: Use LiDAR and orientation data to create more detailed and accurate flight environments. LiDAR data can be used for real-time terrain analysis, while orientation data can help improve the precision of the flight simulation.
 
-- **Kullanıcı Etkileşimli 3D Harita ve Görselleştirmeler**: 3D haritalar ve uçuş sırasında çeşitli dinamikler (hız, irtifa, yönelim vb.) ile etkileşimli görselleştirmeler oluşturulabilir.
+- **Manual Event Insertion and Playback Controls**: Allow users to manually insert events or control the playback of specific time segments during the flight. This would provide more interactivity and make the simulation more educational.
+
+- **Landing Area Map Visualization**: Visualize the landing area and other critical points on a map. This would allow users to better understand the relationship between the flight trajectory and landing zone.
+
+- **Real-Time Flight Tracking**: Enable the synchronization of data in real-time, allowing the app to display live flight parameters. This feature would be particularly useful for training and flight simulation purposes.
+
+- **Interactive 3D Map and Visualizations**: Develop interactive 3D maps and visualizations that enable users to explore various flight dynamics such as speed, altitude, and orientation in a more immersive way.
 
 ---
 
-
-
-
-
+These planned features aim to enhance the simulation and provide users with an even more interactive and detailed understanding of the flight dynamics and events.
