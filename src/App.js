@@ -1,12 +1,40 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import P5Sketch from './P5Sketch';
+import {
+  AppBar,
+  Box,
+  Button,
+  ButtonGroup,
+  Card,
+  CardContent,
+  Container,
+  CssBaseline,
+  Grid,
+  LinearProgress,
+  Paper,
+  ThemeProvider,
+  Toolbar,
+  Typography,
+  createTheme,
+  useTheme
+} from '@mui/material';
+import { blue, grey } from '@mui/material/colors';
 
-// Önemli olayların listesi
+// Blue Origin color palette
+const blueOriginColors = {
+  darkBlue: '#0B3D91',
+  mediumBlue: '#1A66CC',
+  lightBlue: '#3C8DFF',
+  black: '#000000',
+  white: '#FFFFFF',
+  darkGray: '#1A1A1A'
+};
+
 const events = [
   { name: 'Ignition', time: 0, altitude: 1118 },
   { name: 'Liftoff', time: 7.26, altitude: 1118 },
-  { name: 'Max Q', time: 60, altitude: 15000 }, // Örnek değer
+  { name: 'Max Q', time: 60, altitude: 15000 },
   { name: 'MECO', time: 143.49, altitude: 56281 },
   { name: 'Apogee', time: 246.6, altitude: 106744 },
   { name: 'Deploy Brakes', time: 406.34, altitude: 6184 },
@@ -14,24 +42,78 @@ const events = [
   { name: 'Touchdown', time: 447.83, altitude: 1116 },
 ];
 
-
+const theme = createTheme({
+  palette: {
+    mode: 'dark',
+    primary: {
+      main: blueOriginColors.mediumBlue,
+      contrastText: blueOriginColors.white
+    },
+    secondary: {
+      main: blueOriginColors.lightBlue
+    },
+    background: {
+      default: blueOriginColors.black,
+      paper: blueOriginColors.darkGray
+    },
+    text: {
+      primary: blueOriginColors.white,
+      secondary: blueOriginColors.lightBlue
+    }
+  },
+  typography: {
+    fontFamily: '"Orbitron", "Roboto", sans-serif',
+    h5: {
+      fontWeight: 700,
+      letterSpacing: 1
+    },
+    h6: {
+      fontWeight: 600,
+      letterSpacing: 0.5
+    },
+    body1: {
+      letterSpacing: 0.25
+    }
+  },
+  components: {
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          borderRadius: '8px',
+          border: `1px solid ${blueOriginColors.darkBlue}`,
+          background: `linear-gradient(135deg, ${blueOriginColors.darkGray} 0%, #0F0F0F 100%)`
+        }
+      }
+    },
+    MuiPaper: {
+      styleOverrides: {
+        root: {
+          background: `linear-gradient(135deg, ${blueOriginColors.darkGray} 0%, #0F0F0F 100%)`,
+          border: `1px solid ${blueOriginColors.darkBlue}`
+        }
+      }
+    }
+  }
+});
 
 function App() {
-  const [flightData, setFlightData] = useState([]); // Tüm veriler
-  const [simulationData, setSimulationData] = useState([]); // Simülasyon verileri
-  const [isSimulationRunning, setIsSimulationRunning] = useState(false); // Simülasyon durumu
-  const [countdown, setCountdown] = useState('T - 50'); // Geri sayım (T - X formatında)
-  const [progress, setProgress] = useState(0); // Progress bar doluluk oranı
-  const [currentEvent, setCurrentEvent] = useState(null); // Şu anki event
-  const [simulationSpeed, setSimulationSpeed] = useState(1); // Simülasyon hızı (1x, 2x, 4x)
-  const currentIndexRef = useRef(0); // Mevcut veri indeksi (useRef kullanıyoruz)
-  const startTimeRef = useRef(null); // Simülasyon başlangıç zamanı (useRef kullanıyoruz)
-  const requestRef = useRef(); // requestAnimationFrame referansı
-  const eventTimeoutRef = useRef(); // Event zaman aşımı referansı
-  const elapsedTimeRef = useRef(0); // Geçen süreyi saklamak için (useRef kullanıyoruz)
-  const CurrentTimeRef = useRef(); // Şu anki zamanı saklamak için (useRef kullanıyoruz)
-
+  const [flightData, setFlightData] = useState([]);
+  const [simulationData, setSimulationData] = useState([]);
+  const [isSimulationRunning, setIsSimulationRunning] = useState(false);
+  const [countdown, setCountdown] = useState('T - 50');
+  const [progress, setProgress] = useState(0);
+  const [currentEvent, setCurrentEvent] = useState(null);
+  const [simulationSpeed, setSimulationSpeed] = useState(1);
   const [rocketImages, setRocketImages] = useState(null);
+
+  const currentIndexRef = useRef(0);
+  const startTimeRef = useRef(null);
+  const requestRef = useRef();
+  const eventTimeoutRef = useRef();
+  const elapsedTimeRef = useRef(0);
+  const CurrentTimeRef = useRef();
+
+  const theme = useTheme();
 
   useEffect(() => {
     const loadImages = async () => {
@@ -56,7 +138,6 @@ function App() {
   }, []);
 
   useEffect(() => {
-    // JSON verisini yükle
     fetch('/flight_data.json')
       .then((response) => response.json())
       .then((data) => {
@@ -67,32 +148,23 @@ function App() {
 
   const updateSimulation = (timestamp) => {
     if (!startTimeRef.current) {
-      startTimeRef.current = timestamp; // Simülasyon başlangıç zamanını kaydet
+      startTimeRef.current = timestamp;
     }
 
-    // Geçen süreyi hesapla (milisaniye cinsinden)
     const elapsedTime = elapsedTimeRef.current + (timestamp - startTimeRef.current) * simulationSpeed;
-
-    // Şu anki zamanı hesapla (saniye cinsinden)
     const currentTime = -50 + elapsedTime / 1000;
-
-    // Şu anki zamanı tam saniyeye yuvarla
-    const currentSecond = Math.floor(currentTime); // currentSecond tanımlandı
+    const currentSecond = Math.floor(currentTime);
     CurrentTimeRef.current = currentSecond;
-    // Geri sayımı güncelle (T - X formatında)
 
-
-    if (elapsedTime.current > 0) {
+    if (currentSecond > 0) {
       setCountdown(`T + ${Math.abs(currentSecond)}`);
-    }
-    else
+    } else {
       setCountdown(`T - ${Math.abs(currentSecond)}`);
+    }
 
-    // Progress bar doluluk oranını güncelle
-    const progressPercentage = ((currentTime + 50) / 500) * 100; // -50 ile 450 arasında
+    const progressPercentage = ((currentTime + 50) / 500) * 100;
     setProgress(progressPercentage);
 
-    // Şu anki zaman aralığındaki verileri bul
     while (
       currentIndexRef.current < flightData.length &&
       flightData[currentIndexRef.current].flight_time_seconds <= currentTime
@@ -101,280 +173,543 @@ function App() {
       currentIndexRef.current += 1;
     }
 
-    // Önemli eventleri kontrol et
-    const activeEvent = events.find((event) => Math.abs(event.time - currentTime) < 1); // 1 saniye tolerans
+    const activeEvent = events.find((event) => Math.abs(event.time - currentTime) < 1);
     if (activeEvent && currentEvent?.name !== activeEvent.name) {
       setCurrentEvent(activeEvent);
-      // 5 saniye sonra event ismini kaldır
       if (eventTimeoutRef.current) {
         clearTimeout(eventTimeoutRef.current);
       }
       eventTimeoutRef.current = setTimeout(() => {
         setCurrentEvent(null);
-      }, 5000); // 5 saniye
+      }, 5000);
     }
 
-    // Simülasyon devam ediyorsa, bir sonraki kareyi planla
     if (currentTime <= 450) {
       requestRef.current = requestAnimationFrame(updateSimulation);
     } else {
-      setIsSimulationRunning(false); // Simülasyonu durdur
+      setIsSimulationRunning(false);
     }
   };
 
   useEffect(() => {
     if (isSimulationRunning) {
-      // Simülasyon başlatıldığında, requestAnimationFrame ile güncellemeleri başlat
-      startTimeRef.current = null; // Başlangıç zamanını sıfırla
+      startTimeRef.current = null;
       requestRef.current = requestAnimationFrame(updateSimulation);
     } else {
-      // Simülasyon durdurulduğunda, requestAnimationFrame'i temizle
       cancelAnimationFrame(requestRef.current);
     }
 
-    // Temizleme fonksiyonu
     return () => cancelAnimationFrame(requestRef.current);
   }, [isSimulationRunning, simulationSpeed]);
 
-  // Velocity ve Altitude değerlerini hesapla
   const currentVelocity = simulationData.length > 0 ? simulationData[simulationData.length - 1].velocity : 0;
   const currentAltitude = simulationData.length > 0 ? simulationData[simulationData.length - 1].altitude : 0;
 
+  const handleSpeedChange = (speed) => {
+    setSimulationSpeed(speed);
+    elapsedTimeRef.current += (performance.now() - startTimeRef.current) * simulationSpeed;
+    startTimeRef.current = performance.now();
+  };
+
+  const startSimulation = () => {
+    setIsSimulationRunning(true);
+    setSimulationData([]);
+    currentIndexRef.current = 0;
+    startTimeRef.current = null;
+    elapsedTimeRef.current = 0;
+    setCountdown('T - 50');
+    setProgress(0);
+    setCurrentEvent(null);
+  };
+
   return (
-    <div style={{ backgroundColor: '#464747', color: '#FFFFFF', minHeight: '100vh', padding: '20px', fontFamily: 'Arial, sans-serif' }}>
-      {/* Navbar Benzeri Üst Kısım */}
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px', padding: '10px', backgroundColor: '#333333', borderRadius: '10px' }}>
-        <div style={{ display: 'flex', gap: '20px', alignItems: 'center' }}>
-          <div style={{ textAlign: 'center' }}>
-            <h3 style={{ color: '#0000FF', marginBottom: '5px' }}>Velocity</h3>
-            <div style={{ fontSize: '20px', color: '#FFFFFF' }}>{currentVelocity.toFixed(2)} m/s</div>
-          </div>
-          <div style={{ textAlign: 'center' }}>
-            <h3 style={{ color: '#0000FF', marginBottom: '5px' }}>Altitude</h3>
-            <div style={{ fontSize: '20px', color: '#FFFFFF' }}>{currentAltitude.toFixed(2)} m</div>
-          </div>
-          <div style={{ textAlign: 'center' }}>
-            <h3 style={{ color: '#0000FF', marginBottom: '5px' }}>Timer</h3>
-            <div style={{ fontSize: '20px', color: '#FFFFFF' }}>{countdown}</div>
-          </div>
-          {currentEvent && (
-            <div style={{ textAlign: 'center', marginLeft: '20px' }}>
-              <h3 style={{ color: '#FF0000', marginBottom: '5px' }}>Event</h3>
-              <div style={{ fontSize: '20px', color: '#FFFFFF' }}>{currentEvent.name}</div>
-            </div>
-          )}
-        </div>
-        <div style={{ display: 'flex', gap: '10px', alignItems: 'center' }}>
-          {/* Simülasyon Hızı Butonları */}
-          <button
-            onClick={() => {
-              setSimulationSpeed(1);
-              elapsedTimeRef.current += (performance.now() - startTimeRef.current) * simulationSpeed;
-              startTimeRef.current = performance.now();
-            }}
-            style={{
-              padding: '10px 20px',
-              fontSize: '16px',
-              backgroundColor: simulationSpeed === 1 ? '#0000FF' : '#555555',
-              color: '#FFFFFF',
-              border: 'none',
-              borderRadius: '5px',
-              cursor: 'pointer',
+    <ThemeProvider theme={theme}>
+      <CssBaseline />
+      <Box sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        minHeight: '100vh',
+        background: `linear-gradient(135deg, ${blueOriginColors.black} 0%, #121212 100%)`
+      }}>
+        {/* Main Content */}
+        <Container maxWidth="l" sx={{ py: 1, flexGrow: 1 }}>
+          {/* App Bar */}
+          <AppBar
+            position="static"
+            elevation={0}
+            sx={{
+              background: `linear-gradient(90deg, ${blueOriginColors.black} 0%, ${blueOriginColors.darkBlue} 100%)`,
+              borderBottom: `1px solid ${blueOriginColors.mediumBlue}`,
+              py: 1
             }}
           >
-            1x
-          </button>
-          <button
-            onClick={() => {
-              setSimulationSpeed(2);
-              elapsedTimeRef.current += (performance.now() - startTimeRef.current) * simulationSpeed;
-              startTimeRef.current = performance.now();
-            }}
-            style={{
-              padding: '10px 20px',
-              fontSize: '16px',
-              backgroundColor: simulationSpeed === 2 ? '#0000FF' : '#555555',
-              color: '#FFFFFF',
-              border: 'none',
-              borderRadius: '5px',
-              cursor: 'pointer',
-            }}
-          >
-            2x
-          </button>
-          <button
-            onClick={() => {
-              setSimulationSpeed(4);
-              elapsedTimeRef.current += (performance.now() - startTimeRef.current) * simulationSpeed;
-              startTimeRef.current = performance.now();
-            }}
-            style={{
-              padding: '10px 20px',
-              fontSize: '16px',
-              backgroundColor: simulationSpeed === 4 ? '#0000FF' : '#555555',
-              color: '#FFFFFF',
-              border: 'none',
-              borderRadius: '5px',
-              cursor: 'pointer',
-            }}
-          >
-            4x
-          </button>
-          <button
-            onClick={() => {
-              setIsSimulationRunning(true); // Simülasyonu başlat
-              setSimulationData([]); // Verileri sıfırla
-              currentIndexRef.current = 0; // İndeksi sıfırla
-              startTimeRef.current = null; // Başlangıç zamanını sıfırla
-              elapsedTimeRef.current = 0; // Geçen süreyi sıfırla
-              setCountdown('T - 50'); // Geri sayımı sıfırla
-              setProgress(0); // Progress bar'ı sıfırla
-              setCurrentEvent(null); // Event'i sıfırla
-            }}
-            disabled={isSimulationRunning} // Simülasyon çalışırken butonu devre dışı bırak
-            style={{
-              padding: '10px 20px',
-              fontSize: '16px',
-              backgroundColor: '#0000FF',
-              color: '#FFFFFF',
-              border: 'none',
-              borderRadius: '5px',
-              cursor: 'pointer',
-            }}
-          >
-            {isSimulationRunning ? 'Simülasyon Çalışıyor...' : 'Simülasyonu Başlat'}
-          </button>
-        </div>
-      </div>
-
-      {/* Ana Yerleşim */}
-      <div style={{ display: 'flex', gap: '20px', height: '80vh' }}>
-        {/* Sol Taraf: Dikey Progress Bar */}
-        <div style={{ width: '10%', backgroundColor: '#333333', padding: '20px', borderRadius: '10px' }}>
-          <div style={{ height: '100%', width: '20px', backgroundColor: '#555555', borderRadius: '10px', position: 'relative' }}>
-            <div
-              style={{
-                height: `${progress}%`, // Doluluk oranı
+            <Toolbar sx={{
+              minHeight: '64px !important',
+              flexDirection: 'column',
+              alignItems: 'stretch'
+            }}>
+              {/* Başlık Kısmı */}
+              <Box sx={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
                 width: '100%',
-                backgroundColor: '#0000FF',
-                borderRadius: '10px',
-                position: 'absolute',
-                bottom: 0, // Aşağıdan yukarıya dolacak
-              }}
-            />
-            {events.map((event, index) => (
-              <div
-                key={index}
-                style={{
-                  position: 'absolute',
-                  bottom: `${((event.time + 47) / 500) * 100}%`, // Olayın zamanına göre konumlandır
-                  left: '100%',
-                  marginLeft: '10px',
-                  whiteSpace: 'nowrap',
-                  fontSize: '12px',
-                  color: '#FFFFFF',
-                }}
-              >
-                {/* Dikey Çizgi */}
-                <div
-                  style={{
+                mb: 2
+              }}>
+                <Typography variant="h6" component="div">
+                  <Box component="span" sx={{ color: blueOriginColors.lightBlue }}>BLUE</Box> ORIGIN LAUNCH SIMULATOR
+                </Typography>
+
+                {/* Hız Kontrolleri ve Launch Butonu */}
+                <Box sx={{ display: 'flex', gap: 1 }}>
+                  <ButtonGroup variant="contained" size="medium">
+                    <Button
+                      onClick={() => handleSpeedChange(1)}
+                      sx={{
+                        bgcolor: simulationSpeed === 1 ? blueOriginColors.mediumBlue : blueOriginColors.darkBlue,
+                        '&:hover': { bgcolor: blueOriginColors.mediumBlue }
+                      }}
+                    >
+                      1x
+                    </Button>
+                    <Button
+                      onClick={() => handleSpeedChange(2)}
+                      sx={{
+                        bgcolor: simulationSpeed === 2 ? blueOriginColors.mediumBlue : blueOriginColors.darkBlue,
+                        '&:hover': { bgcolor: blueOriginColors.mediumBlue }
+                      }}
+                    >
+                      2x
+                    </Button>
+                    <Button
+                      onClick={() => handleSpeedChange(4)}
+                      sx={{
+                        bgcolor: simulationSpeed === 4 ? blueOriginColors.mediumBlue : blueOriginColors.darkBlue,
+                        '&:hover': { bgcolor: blueOriginColors.mediumBlue }
+                      }}
+                    >
+                      4x
+                    </Button>
+                  </ButtonGroup>
+                  <Button
+                    onClick={startSimulation}
+                    disabled={isSimulationRunning}
+                    variant="contained"
+                    size="medium"
+                    sx={{
+                      bgcolor: blueOriginColors.lightBlue,
+                      '&:hover': { bgcolor: blueOriginColors.mediumBlue },
+                      minWidth: '120px'
+                    }}
+                  >
+                    {isSimulationRunning ? 'Running...' : 'Launch'}
+                  </Button>
+                </Box>
+              </Box>
+
+              {/* Metrikler Kısmı */}
+              <Box sx={{
+                display: 'flex',
+                gap: 2,
+                width: '100%',
+                flexWrap: 'wrap'
+              }}>
+                <Card sx={{
+                  flex: '1 1 200px',
+                  minWidth: '120px',
+                  height: '8vh',
+                  background: 'rgba(0,0,0,0.3)'
+                }}>
+                  <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
+                    <Typography variant="overline" color="white">
+                      Velocity
+                    </Typography>
+                    <Typography variant="h5" color="primary">
+                      {currentVelocity.toFixed(2)} m/s
+                    </Typography>
+                  </CardContent>
+                </Card>
+
+                <Card sx={{
+                  flex: '1 1 200px',
+                  minWidth: '120px',
+                  height: '8vh',
+                  background: 'rgba(0,0,0,0.3)'
+                }}>
+                  <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
+                    <Typography variant="overline" color="white">
+                      Altitude
+                    </Typography>
+                    <Typography variant="h5" color="primary">
+                      {currentAltitude.toFixed(2)} m
+                    </Typography>
+                  </CardContent>
+                </Card>
+
+                <Card sx={{
+                  flex: '1 1 200px',
+                  minWidth: '120px',
+                  height: '8vh',
+                  background: 'rgba(0,0,0,0.3)'
+
+                }}>
+                  <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
+                    <Typography variant="overline" color="white">
+                      Timer
+                    </Typography>
+                    <Typography variant="h5" color="primary">
+                      {countdown}
+                    </Typography>
+                  </CardContent>
+                </Card>
+
+                {currentEvent && (
+                  <Card sx={{
+                    flex: '1 1 300px',
+                    minWidth: '200px',
+                    height: '8vh',
+                    borderLeft: `4px solid ${blueOriginColors.lightBlue}`,
+                    background: `linear-gradient(90deg, rgba(11,61,145,0.2) 0%, rgba(11,61,145,0.1) 100%)`
+                  }}>
+                    <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
+                      <Typography variant="overline" color="white">
+                        Current Event
+                      </Typography>
+                      <Typography variant="h5" color='#FFFF00'>
+                        {currentEvent.name}
+                      </Typography>
+                    </CardContent>
+                  </Card>
+                )}
+              </Box>
+            </Toolbar>
+          </AppBar>
+
+
+
+
+          {/* Main Layout */}
+          <Grid container spacing={2} sx={{ height: '60vh', marginTop: '1vh' }}>
+            {/* Timeline */}
+            <Grid item xs={1}>
+              <Paper elevation={7} sx={{
+                height: '80vh',
+                backgroundColor: blueOriginColors.darkGray,
+
+                p: 1,
+                position: 'relative',
+                overflow: 'visible'
+              }}>
+                <Box sx={{
+                  height: '100%',
+                  width: '16px',
+                  mx: 'auto',
+                  marginLeft: '1vh',
+                  position: 'relative',
+                  background: `linear-gradient(180deg, ${blueOriginColors.darkBlue} 0%, rgba(0,0,0,0) 100%)`,
+                  borderRadius: '8px'
+                }}>
+                  {/* Progress track */}
+                  <Box sx={{
+                    height: '100%',
+                    width: '100%',
                     position: 'absolute',
-                    left: '-30px',
-                    top: '50%',
-                    height: '1%',
-                    width: '20px',
-                    backgroundColor: '#0000FF',
-                    transform: 'translateY(-50%)',
-                  }}
-                />
-                {event.name} ({event.time}s)
-              </div>
-            ))}
-          </div>
-        </div>
 
-        {/* Orta: 3D Simülasyon (P5.js Animasyonu) */}
-        <div style={{ flex: 2, backgroundColor: '#333333', padding: '20px', borderRadius: '10px', position: 'relative' }}>
-          <P5Sketch altitude={currentAltitude} velocity={currentVelocity} isSimulationRunning={isSimulationRunning} elapsedTime={CurrentTimeRef.current} rocketImages={rocketImages} />
-        </div>
+                    background: 'rgba(11,61,145,0.2)',
+                    borderRadius: '8px'
+                  }} />
 
-        {/* Sağ Taraf: Grafikler */}
-        <div style={{ width: '30%', display: 'flex', flexDirection: 'column', gap: '20px' }}>
-          {/* Altitude vs. Time Grafiği */}
-          <div style={{ flex: 1, backgroundColor: '#333333', padding: '20px', borderRadius: '10px' }}>
-            <h3 style={{ color: '#0000FF', marginBottom: '10px' }}>Altitude vs. Time</h3>
-            <ResponsiveContainer width="100%" height={200}>
-              <LineChart
-                data={simulationData}
-                margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="#555555" />
-                <XAxis
-                  dataKey="flight_time_seconds"
-                  type="number"
-                  domain={[-50, 450]}
-                  ticks={[-50, 0, 50, 100, 150, 200, 250, 300, 350, 400, 450]}
-                  tick={{ fill: '#FFFFFF' }}
-                  label={{ value: 'Flight Time (seconds)', position: 'insideBottom', offset: -20, fill: '#FFFFFF' }}
-                />
-                <YAxis
-                  domain={[0, 110000]}
-                  tick={{ fill: '#FFFFFF' }}
-                  label={{ value: 'Altitude AGL (meters)', angle: -90, position: 'insideLeft', offset: 60, fill: '#FFFFFF' }}
-                />
-                <Tooltip contentStyle={{ backgroundColor: '#333333', color: '#FFFFFF' }} />
-                <Legend wrapperStyle={{ color: '#FFFFFF' }} />
-                <Line
-                  type="monotone"
-                  dataKey="altitude"
-                  stroke="#82ca9d"
-                  strokeWidth={2}
-                  dot={false}
-                  name="Altitude"
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
+                  {/* Progress indicator */}
+                  <Box
+                    sx={{
+                      height: `${progress}%`,
+                      width: '100%',
 
-          {/* Velocity vs. Time Grafiği */}
-          <div style={{ flex: 1, backgroundColor: '#333333', padding: '20px', borderRadius: '10px' }}>
-            <h3 style={{ color: '#0000FF', marginBottom: '10px' }}>Velocity vs. Time</h3>
-            <ResponsiveContainer width="100%" height={200}>
-              <LineChart
-                data={simulationData}
-                margin={{ top: 0, right: 0, left: 0, bottom: 0 }}
-              >
-                <CartesianGrid strokeDasharray="3 3" stroke="#555555" />
-                <XAxis
-                  dataKey="flight_time_seconds"
-                  type="number"
-                  domain={[-50, 450]}
-                  ticks={[-50, 0, 50, 100, 150, 200, 250, 300, 350, 400, 450]}
-                  tick={{ fill: '#FFFFFF' }}
-                  label={{ value: 'Flight Time (seconds)', position: 'insideBottom', offset: -20, fill: '#FFFFFF' }}
-                />
-                <YAxis
-                  domain={[0, 1000]}
-                  ticks={[0, 500, 1000]}
-                  tick={{ fill: '#FFFFFF' }}
-                  label={{ value: 'Velocity (m/s)', angle: -90, position: 'insideLeft', offset: 60, fill: '#FFFFFF' }}
-                />
-                <Tooltip contentStyle={{ backgroundColor: '#333333', color: '#FFFFFF' }} />
-                <Legend wrapperStyle={{ color: '#FFFFFF' }} />
-                <Line
-                  type="monotone"
-                  dataKey="velocity"
-                  stroke="#82ca9d"
-                  strokeWidth={2}
-                  dot={false}
-                  name="Velocity"
-                />
-              </LineChart>
-            </ResponsiveContainer>
-          </div>
-        </div>
-      </div>
-    </div>
+                      background: `linear-gradient(180deg, ${blueOriginColors.lightBlue} 0%, ${blueOriginColors.mediumBlue} 100%)`,
+                      borderRadius: '8px',
+                      position: 'absolute',
+                      bottom: 0,
+                      boxShadow: `0 0 8px ${blueOriginColors.lightBlue}`,
+                      transition: 'height 0.1s linear'
+                    }}
+                  />
+
+                  {/* Event markers */}
+                  {events.map((event, index) => (
+                    <Box
+                      key={index}
+                      sx={{
+                        position: 'absolute',
+                        bottom: `${((event.time + 47) / 500) * 100}%`,
+
+                        marginLeft: '-1.2vh',
+                        transform: 'translateX(-50%)',
+                        width: '100%',
+                        zIndex: 2
+                      }}
+                    >
+                      <Box
+                        sx={{
+                          position: 'absolute',
+                          left: '20px',
+                          top: '50%',
+                          height: '2px',
+                          width: '24px',
+                          background: `linear-gradient(90deg, ${blueOriginColors.lightBlue} 0%, rgba(11,61,145,0) 100%)`,
+                          transform: 'translateY(-50%)'
+                        }}
+                      />
+                      <Typography
+                        variant="caption"
+                        sx={{
+                          position: 'absolute',
+                          left: '44px',
+                          top: '50%',
+                          transform: 'translateY(-50%)',
+                          whiteSpace: 'nowrap',
+                          color: blueOriginColors.lightBlue,
+                          fontSize: '0.7rem',
+                          fontWeight: 600,
+
+                          textShadow: `0 0 4px ${blueOriginColors.lightBlue}`
+                        }}
+                      >
+                        {event.name} ({event.time}s)
+                      </Typography>
+                    </Box>
+                  ))}
+                </Box>
+              </Paper>
+            </Grid>
+
+            {/* 3D Visualization */}
+            <Grid item xs={7}>
+              <Paper elevation={3} sx={{
+                height: '100%',
+                p: 0,
+                overflow: 'hidden',
+                position: 'relative',
+                '&:before': {
+                  content: '""',
+                  position: 'absolute',
+                  inset: 0,
+                  background: `linear-gradient(135deg, rgba(11,61,145,0.1) 0%, rgba(0,0,0,0) 100%)`,
+                  pointerEvents: 'none'
+                }
+              }}>
+                {/* 3D Visualization */}
+                <Grid item xs={7}>
+                  <Paper elevation={3} sx={{
+                    height: '100%',
+                    p: 0,
+                    overflow: 'hidden',
+                    position: 'relative',
+                    '&:before': {
+                      content: '""',
+                      position: 'absolute',
+                      inset: 0,
+                      background: `linear-gradient(135deg, rgba(11,61,145,0.1) 0%, rgba(0,0,0,0) 100%)`,
+                      pointerEvents: 'none'
+                    }
+                  }}>
+                    <P5Sketch
+                      altitude={currentAltitude}
+                      velocity={currentVelocity}
+                      isSimulationRunning={isSimulationRunning}
+                      elapsedTime={CurrentTimeRef.current}
+                      rocketImages={rocketImages}
+                    />
+
+                    {/* Optimize Edilmiş Kare Çerçeveler */}
+                    <Box sx={{
+                      position: 'absolute',
+                      top: 16,
+                      right: 16,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 2,
+                      zIndex: 1,
+                      width: '22%', // Konteyner genişliği
+                      maxWidth: 150 // Maksimum genişlik
+                    }}>
+                      <Box sx={{
+                        width: '100%',
+                        aspectRatio: '1/1', // Kare formunu koru
+                        border: `1.5px solid ${blueOriginColors.mediumBlue}`,
+                        borderRadius: '4px',
+                        backgroundColor: 'rgba(11, 61, 145, 0.2)',
+                        backdropFilter: 'blur(2px)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                        '&:hover': {
+                          borderColor: blueOriginColors.lightBlue
+                        }
+                      }}>
+                        {/* 1. Çerçeve İçeriği */}
+                      </Box>
+
+                      <Box sx={{
+                        width: '100%',
+                        aspectRatio: '1/1', // Kare formunu koru
+                        border: `1.5px solid ${blueOriginColors.mediumBlue}`,
+                        borderRadius: '4px',
+                        backgroundColor: 'rgba(11, 61, 145, 0.2)',
+                        backdropFilter: 'blur(2px)',
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        boxShadow: '0 2px 8px rgba(0,0,0,0.2)',
+                        '&:hover': {
+                          borderColor: blueOriginColors.lightBlue
+                        }
+                      }}>
+                        {/* 2. Çerçeve İçeriği */}
+                      </Box>
+                    </Box>
+                  </Paper>
+                </Grid>
+              </Paper>
+            </Grid>
+
+            {/* Charts */}
+            <Grid item xs={4} >
+              <Grid container direction="column" spacing={2} sx={{ height: '100%' }}>
+                <Grid item xs={6} >
+                  <Paper elevation={3} sx={{ height: '100%', p: 1.5 }}>
+                    <Typography variant="h6" gutterBottom color="primary" sx={{ mb: 1 }}>
+                      ALTITUDE vs TIME
+                    </Typography>
+                    <Box sx={{ height: 'calc(100% - 36px)' }} >
+                      <ResponsiveContainer width="100%" height={250} >
+                        <LineChart data={simulationData} >
+                          <CartesianGrid strokeDasharray="3 3" stroke={blueOriginColors.darkBlue} />
+                          <XAxis
+                            dataKey="flight_time_seconds"
+                            type="number"
+                            domain={[-50, 450]}
+                            ticks={[-50, 0, 50, 100, 150, 200, 250, 300, 350, 400, 450]}
+                            tick={{
+                              fill: blueOriginColors.lightBlue,
+                              fontSize: '0.7rem'
+                            }}
+                            label={{
+                              value: 'FLIGHT TIME (SECONDS)',
+                              position: 'insideBottom',
+                              offset: -5,
+                              fill: blueOriginColors.lightBlue,
+                              fontSize: '0.7rem'
+                            }}
+                          />
+                          <YAxis
+                            domain={[0, 110000]}
+                            tick={{
+                              fill: blueOriginColors.lightBlue,
+                              fontSize: '0.7rem'
+                            }}
+                            label={{
+                              value: 'ALTITUDE (METERS)',
+                              angle: -90,
+                              position: 'insideLeft',
+                              offset: 10,
+                              fill: blueOriginColors.lightBlue,
+
+                              fontSize: '0.7rem'
+                            }}
+                          />
+                          <Tooltip
+                            contentStyle={{
+                              background: blueOriginColors.white,
+                              borderColor: blueOriginColors.mediumBlue,
+                              borderRadius: '4px',
+                              boxShadow: `0 0 8px ${blueOriginColors.darkBlue}`
+                            }}
+                          />
+                          <Line
+                            type="monotone"
+                            dataKey="altitude"
+                            stroke={blueOriginColors.lightBlue}
+                            strokeWidth={3}
+                            dot={false}
+                            name="Altitude"
+                            isAnimationActive={false}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </Box>
+                  </Paper>
+                </Grid>
+                <Grid item xs={6}>
+                  <Paper elevation={3} sx={{ height: '100%', p: 1.5 }}>
+                    <Typography variant="h6" gutterBottom color="primary" sx={{ mb: 1 }}>
+                      VELOCITY vs TIME
+                    </Typography>
+                    <Box sx={{ height: 'calc(100% - 36px)' }}>
+                      <ResponsiveContainer width="100%" height={250}>
+                        <LineChart data={simulationData}>
+                          <CartesianGrid strokeDasharray="3 3" stroke={blueOriginColors.darkBlue} />
+                          <XAxis
+                            dataKey="flight_time_seconds"
+                            type="number"
+                            domain={[-50, 450]}
+                            ticks={[-50, 0, 50, 100, 150, 200, 250, 300, 350, 400, 450]}
+                            tick={{
+                              fill: blueOriginColors.lightBlue,
+                              fontSize: '0.7rem'
+                            }}
+                            label={{
+                              value: 'FLIGHT TIME (SECONDS)',
+                              position: 'insideBottom',
+                              offset: -5,
+                              fill: blueOriginColors.lightBlue,
+                              fontSize: '0.7rem'
+                            }}
+                          />
+                          <YAxis
+                            domain={[0, 1000]}
+                            ticks={[0, 500, 1000]}
+                            tick={{
+                              fill: blueOriginColors.lightBlue,
+                              fontSize: '0.7rem'
+                            }}
+                            label={{
+                              value: 'VELOCITY (M/S)',
+                              angle: -90,
+                              position: 'insideLeft',
+                              offset: 10,
+                              fill: blueOriginColors.lightBlue,
+                              fontSize: '0.7rem'
+                            }}
+                          />
+                          <Tooltip
+                            contentStyle={{
+                              background: blueOriginColors.white,
+                              borderColor: blueOriginColors.mediumBlue,
+                              borderRadius: '4px',
+                              boxShadow: `0 0 8px ${blueOriginColors.darkBlue}`
+                            }}
+                          />
+                          <Line
+                            type="monotone"
+                            dataKey="velocity"
+                            stroke={blueOriginColors.lightBlue}
+                            strokeWidth={3}
+                            dot={false}
+                            name="Velocity"
+                            isAnimationActive={false}
+                          />
+                        </LineChart>
+                      </ResponsiveContainer>
+                    </Box>
+                  </Paper>
+                </Grid>
+              </Grid>
+            </Grid>
+          </Grid>
+        </Container>
+      </Box>
+    </ThemeProvider>
   );
 }
 

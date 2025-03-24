@@ -11,7 +11,7 @@ const P5Sketch = ({ altitude, velocity, isSimulationRunning, elapsedTime, rocket
       let pixelsPerMeter;
 
       p.setup = () => {
-        p.createCanvas(400, 740).parent(sketchRef.current);
+        p.createCanvas(400, 780).parent(sketchRef.current);
         pixelsPerMeter = p.height / visibleRange;
         p.noLoop();
         p.canvas.style.visibility = 'visible';
@@ -44,23 +44,54 @@ const P5Sketch = ({ altitude, velocity, isSimulationRunning, elapsedTime, rocket
       };
 
       const drawRuler = (cameraCenterY) => {
-        p.stroke(150);
+        // Blue Origin renk paleti
+        const darkBlue = [11, 61, 145];    // #0B3D91
+        const mediumBlue = [42, 100, 180];  // #2A64B4
+        const lightBlue = [72, 145, 234];   // #4891EA
+        
         p.strokeWeight(1);
+        
         let startAlt = cameraCenterY - visibleRange / 2;
         let endAlt = cameraCenterY + visibleRange / 2;
+        
         for (let i = 0; i <= maxAltitude; i += 1000) {
-          if (i >= startAlt && i <= endAlt) {
-            let y = p.map(i, startAlt, endAlt, p.height, 0);
-            p.line(0, y, p.width, y);
-            p.noStroke();
-            p.fill(150);
-            p.textSize(12);
-            p.textAlign(p.LEFT, p.CENTER);
-            p.text(i / 1000 + " km", 5, y);
-            p.stroke(150);
-          }
+            if (i >= startAlt && i <= endAlt) {
+                let y = p.map(i, startAlt, endAlt, p.height, 0);
+                
+                // Gradient çizgi çizimi
+                for (let x = 0; x < p.width; x++) {
+                    let inter = p.map(x, 0, p.width, 0, 1);
+                    let c = p.lerpColor(
+                        p.color(...darkBlue, 150),
+                        p.color(...mediumBlue, 150),
+                        inter
+                    );
+                    p.stroke(c);
+                    p.line(x, y, x, y+1);
+                }
+                
+                // Metin ve gölge efekti
+                p.noStroke();
+                
+                // Gölge
+                p.fill(0, 0, 0, 100);
+                p.textSize(12);
+                p.textAlign(p.LEFT, p.CENTER);
+                p.text(i / 1000 + " km", 11, y+20);
+                
+                // Ana metin
+                p.fill(...lightBlue);
+                p.text(i / 1000 + " km", 10, y+20);
+                
+                // Özel yüksekliklerde vurgulu çizgi
+                if (i % 10000 === 0) {
+                    p.stroke(...lightBlue, 200);
+                    p.strokeWeight(2);
+                    p.line(0, y, p.width, y);
+                }
+            }
         }
-      };
+    };
 
       const getRocketImageByTime = (time) => {
       
