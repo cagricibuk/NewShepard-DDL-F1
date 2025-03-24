@@ -14,6 +14,8 @@ const events = [
   { name: 'Touchdown', time: 447.83, altitude: 1116 },
 ];
 
+
+
 function App() {
   const [flightData, setFlightData] = useState([]); // Tüm veriler
   const [simulationData, setSimulationData] = useState([]); // Simülasyon verileri
@@ -27,6 +29,31 @@ function App() {
   const requestRef = useRef(); // requestAnimationFrame referansı
   const eventTimeoutRef = useRef(); // Event zaman aşımı referansı
   const elapsedTimeRef = useRef(0); // Geçen süreyi saklamak için (useRef kullanıyoruz)
+  const CurrentTimeRef = useRef(); // Şu anki zamanı saklamak için (useRef kullanıyoruz)
+
+  const [rocketImages, setRocketImages] = useState(null);
+
+  useEffect(() => {
+    const loadImages = async () => {
+      const loadImg = (src) =>
+        new Promise((resolve) => {
+          const img = new Image();
+          img.src = src;
+          img.onload = () => resolve(img);
+        });
+
+      const images = {
+        default: await loadImg('/images/NSDefault.png'),
+        fire: await loadImg('/images/NSFire.png'),
+        booster: await loadImg('/images/NSBooster.png'),
+        deployed: await loadImg('/images/NSDeployed.png'),
+      };
+
+      setRocketImages(images);
+    };
+
+    loadImages();
+  }, []);
 
   useEffect(() => {
     // JSON verisini yükle
@@ -51,9 +78,15 @@ function App() {
 
     // Şu anki zamanı tam saniyeye yuvarla
     const currentSecond = Math.floor(currentTime); // currentSecond tanımlandı
-
+    CurrentTimeRef.current = currentSecond;
     // Geri sayımı güncelle (T - X formatında)
-    setCountdown(`T - ${Math.abs(currentSecond)}`);
+
+
+    if (elapsedTime.current > 0) {
+      setCountdown(`T + ${Math.abs(currentSecond)}`);
+    }
+    else
+      setCountdown(`T - ${Math.abs(currentSecond)}`);
 
     // Progress bar doluluk oranını güncelle
     const progressPercentage = ((currentTime + 50) / 500) * 100; // -50 ile 450 arasında
@@ -262,7 +295,7 @@ function App() {
 
         {/* Orta: 3D Simülasyon (P5.js Animasyonu) */}
         <div style={{ flex: 2, backgroundColor: '#333333', padding: '20px', borderRadius: '10px', position: 'relative' }}>
-          <P5Sketch altitude={currentAltitude} velocity={currentVelocity} isSimulationRunning={isSimulationRunning} />
+          <P5Sketch altitude={currentAltitude} velocity={currentVelocity} isSimulationRunning={isSimulationRunning} elapsedTime={CurrentTimeRef.current} rocketImages={rocketImages} />
         </div>
 
         {/* Sağ Taraf: Grafikler */}

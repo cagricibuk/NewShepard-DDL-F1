@@ -1,47 +1,46 @@
 import React, { useEffect, useRef } from 'react';
 import p5 from 'p5';
 
-const P5Sketch = ({ altitude, velocity, isSimulationRunning }) => {
+const P5Sketch = ({ altitude, velocity, isSimulationRunning, elapsedTime, rocketImages }) => {
   const sketchRef = useRef(null);
 
   useEffect(() => {
     const sketch = (p) => {
-      const maxAltitude = 100000; // 100 km
-      const visibleRange = 5000; // 5 km'lik görüntü alanı
+      const maxAltitude = 100000;
+      const visibleRange = 2000;
       let pixelsPerMeter;
 
       p.setup = () => {
-        p.createCanvas(400, 600).parent(sketchRef.current);
-        pixelsPerMeter = p.height / visibleRange; // ekrana 5 km sığacak şekilde oran
+        p.createCanvas(400, 740).parent(sketchRef.current);
+        pixelsPerMeter = p.height / visibleRange;
+        p.noLoop();
+        p.canvas.style.visibility = 'visible';
       };
 
       p.draw = () => {
+        if (!rocketImages) {
+          p.background(0);
+          p.fill(255);
+          p.textSize(20);
+          p.textAlign(p.CENTER, p.CENTER);
+          p.text('Loading...', p.width / 2, p.height / 2);
+          return;
+        }
+
         p.background(0);
-
-        // Roketin yüksekliğini ve hızını React state'inden al
-        let rocketY = altitude; // Yükseklik
-        let rocketV = velocity; // Hız
-
-        // Kameranın takip edeceği offset (roket ekranın ortasında olacak şekilde)
+        let rocketY = altitude;
+        let rocketV = velocity;
         let cameraCenterY = rocketY;
 
         drawRuler(cameraCenterY);
         drawRocket(cameraCenterY);
 
-        // Yükseklik ve hız bilgisi
         p.fill(255);
         p.noStroke();
         p.textSize(16);
         p.textAlign(p.LEFT, p.TOP);
         p.text("Yükseklik: " + p.nf(rocketY / 1000, 1, 2) + " km", 10, 10);
         p.text("Hız: " + p.nf(rocketV, 1, 2) + " m/s", 10, 30);
-
-        if (rocketY >= maxAltitude) {
-          p.noLoop();
-          p.textSize(32);
-          p.textAlign(p.CENTER, p.CENTER);
-          p.text("100 km'ye ulaşıldı!", p.width / 2, p.height / 2);
-        }
       };
 
       const drawRuler = (cameraCenterY) => {
@@ -49,7 +48,7 @@ const P5Sketch = ({ altitude, velocity, isSimulationRunning }) => {
         p.strokeWeight(1);
         let startAlt = cameraCenterY - visibleRange / 2;
         let endAlt = cameraCenterY + visibleRange / 2;
-        for (let i = 0; i <= maxAltitude; i += 1000) { // her 1 km çizgi
+        for (let i = 0; i <= maxAltitude; i += 1000) {
           if (i >= startAlt && i <= endAlt) {
             let y = p.map(i, startAlt, endAlt, p.height, 0);
             p.line(0, y, p.width, y);
@@ -63,30 +62,46 @@ const P5Sketch = ({ altitude, velocity, isSimulationRunning }) => {
         }
       };
 
-      const drawRocket = (cameraCenterY) => {
-        let rocketScreenY = p.map(altitude, cameraCenterY - visibleRange / 2, cameraCenterY + visibleRange / 2, p.height, 0);
-        p.fill(255, 0, 0);
-        p.noStroke();
-        p.rect(p.width / 2 - 5, rocketScreenY - 30, 10, 30); // gövde
-        p.fill(255, 165, 0);
-        p.triangle(
-          p.width / 2 - 5,
-          rocketScreenY,
-          p.width / 2 + 5,
-          rocketScreenY,
-          p.width / 2,
-          rocketScreenY + 20
-        ); // alev
+      const getRocketImageByTime = (time) => {
+      
+        if (time < 0) return rocketImages.default;
+        if (time >= 0 && time < 143.49) return rocketImages.fire;
+        if (time >= 143.49 && time < 246.6) return rocketImages.default;
+        if (time >= 246.6 && time < 406.34) return rocketImages.booster;
+        if (time >= 406.34) return rocketImages.deployed;
+        return rocketImages.default;
       };
+
+      const drawRocket = (cameraCenterY) => {
+        let rocketScreenY = p.map(
+          altitude,
+          cameraCenterY - visibleRange / 2,
+          cameraCenterY + visibleRange / 2,
+          p.height,
+          0
+        );
+      
+        var rocketImg = getRocketImageByTime(elapsedTime);
+        
+        if (rocketImg) {
+          p.drawingContext.drawImage(
+            rocketImg,
+            p.width / 2 - 30,   // X konumu (sol üst köşe)
+            rocketScreenY - 60, // Y konumu (sol üst köşe)
+            40,                 // genişlik
+            120                 // yükseklik
+          );
+        }
+      };
+      
     };
 
     const p5Instance = new p5(sketch);
 
-    // Temizleme fonksiyonu
     return () => {
       p5Instance.remove();
     };
-  }, [altitude, velocity, isSimulationRunning]); // Prop'lar değiştiğinde yeniden render et
+  }, [altitude, velocity, isSimulationRunning, elapsedTime, rocketImages]);
 
   return <div ref={sketchRef}></div>;
 };
