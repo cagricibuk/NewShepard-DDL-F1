@@ -1,70 +1,48 @@
-# Getting Started with Create React App
+# 🚀 Blue Origin BODDL-TP Flight 1 Visualization
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+Bu proje, **Blue Origin Deorbit, Descent, and Landing Tipping Point (BODDL-TP) Game Changing Development (GCD) Programı** kapsamında elde edilen uçuş verilerini kullanarak geliştirilmiş, uçuşu görsel olarak izlemeye ve analiz etmeye olanak sağlayan interaktif bir simülasyon arayüzüdür.
 
-## Available Scripts
+## ✨ Proje Özellikleri
+- **React** ile geliştirilmiş modern ve responsive frontend
+- **Material UI** kütüphanesi desteğiyle şık ve kullanışlı kullanıcı arayüzü
+- **p5.js** kullanılarak oluşturulmuş 3D uçuş simülasyonu
+- Hız–Zaman ve İrtifa–Zaman grafik gösterimleri
+- Dikey **Flight Events Bar** ile uçuş boyunca kritik olayların görsel takibi
+- Python scriptleri ile veri ön işleme ve uçuş zamanı senkronizasyonu
 
-In the project directory, you can run:
+## 📁 Kullanılan Veriler
+Veriler, NASA ve Blue Origin tarafından sağlanan, Flight 1 sırasında kaydedilmiş:
+- IMU verileri (delta velocity, delta angle)
+- Truth verileri (pozisyon, hız ve yönelim)
+- Commercial LiDAR verileri (beam hatları boyunca hız ve mesafe ölçümleri)
+- Önemli uçuş olaylarının zaman damgaları (liftoff, MECO, apogee, vb.)
 
-### `npm start`
+## 🛠️ Kullanılan Teknolojiler
+| Teknoloji            | Kullanım Amacı                         |
+|----------------------|-----------------------------------------|
+| **React**            | Front-end geliştirme                   |
+| **Material UI**      | UI komponentleri ve tasarım desteği    |
+| **p5.js**            | 3D simülasyon ve animasyon             |
+| **Python**           | Veri düzenleme ve ön işleme            |
+| **Chart.js**         | Zaman serisi grafikler için     |
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+## 📌 Geliştirme Planları
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+Bu proje üzerinde yapılacak geliştirmeler ve iyileştirmeler aşağıda sıralanmıştır:
 
-### `npm test`
+- **Commercial LiDAR ve Yönelim Verileri**: Bu veriler kullanılarak daha detaylı uçuş ortamları oluşturulabilir. LiDAR verileri ile gerçek zamanlı zemin analizleri ve yönelim verileriyle uçuşun doğruluğu artırılabilir.
+  
+- **Manuel Olay Ekleme ve Oynatma Kontrol Seçenekleri**: Kullanıcıların uçuş sırasında manuel olarak olayları ekleyebilmesi veya belirli bir zaman dilimini oynatabilmesi sağlanabilir. Bu, uçuş simülasyonlarının daha etkileşimli ve eğitici olmasına yardımcı olabilir.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+- **İniş Bölgesi Harita Gösterimi**: İniş bölgesi ve diğer önemli noktalar harita üzerinde görselleştirilebilir. Bu sayede uçuş rotası ve iniş bölgesi arasındaki ilişki daha net anlaşılabilir.
 
-### `npm run build`
+- **Gerçek Zamanlı Uçuş Takibi**: Verilerin gerçek zamanlı olarak senkronize edilmesi ve anlık uçuş parametrelerinin görüntülenmesi sağlanabilir. Bu, özellikle eğitim ve simülasyon amaçlı uçuşlarda oldukça faydalı olacaktır.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+- **Kullanıcı Etkileşimli 3D Harita ve Görselleştirmeler**: 3D haritalar ve uçuş sırasında çeşitli dinamikler (hız, irtifa, yönelim vb.) ile etkileşimli görselleştirmeler oluşturulabilir.
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+---
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
 
-### `npm run eject`
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
-
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
-
-## Learn More
-
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
-
-To learn React, check out the [React documentation](https://reactjs.org/).
-
-### Code Splitting
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
-
-### Analyzing the Bundle Size
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
-
-### Making a Progressive Web App
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
-
-### Advanced Configuration
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
-
-### Deployment
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
-
-### `npm run build` fails to minify
-
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
