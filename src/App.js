@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import P5Sketch from './P5Sketch';
+// Material-UI ikonlarını import edin (üst kısma ekleyin)
+import ScienceIcon from '@mui/icons-material/Science';
 import {
   AppBar,
   Box,
@@ -228,162 +230,204 @@ function App() {
       <Box sx={{
         display: 'flex',
         flexDirection: 'column',
-        minHeight: '100vh',
+        minHeight: '110vh',
         background: `linear-gradient(135deg, ${blueOriginColors.black} 0%, #121212 100%)`
       }}>
         {/* Main Content */}
         <Container maxWidth="l" sx={{ py: 1, flexGrow: 1 }}>
           {/* App Bar */}
-          <AppBar
-            position="static"
-            elevation={0}
-            sx={{
-              background: `linear-gradient(90deg, ${blueOriginColors.black} 0%, ${blueOriginColors.darkBlue} 100%)`,
-              borderBottom: `1px solid ${blueOriginColors.mediumBlue}`,
-              py: 1
-            }}
-          >
-            <Toolbar sx={{
-              minHeight: '64px !important',
-              flexDirection: 'column',
-              alignItems: 'stretch'
+          <AppBar 
+      position="static" 
+      elevation={0}
+      sx={{ 
+        background: `linear-gradient(90deg, ${blueOriginColors.black} 0%, ${blueOriginColors.darkBlue} 100%)`,
+        borderBottom: `1px solid ${blueOriginColors.mediumBlue}`,
+        py: 1
+      }}
+    >
+      <Toolbar sx={{
+        minHeight: '64px !important',
+        flexDirection: 'column',
+        alignItems: 'stretch'
+      }}>
+        {/* YENİ: Üst bilgi çubuğu - Uçuş bilgileri */}
+        <Box sx={{ 
+          display: 'flex',
+          justifyContent: 'center',
+          mb: 1,
+          position: 'relative',
+          height: '24px' // Sabit yükseklik
+        }}>
+          {/* Sol taraf - Uçuş bilgisi */}
+          <Box sx={{
+            position: 'absolute',
+            left: 0,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            display: { xs: 'none', sm: 'flex' } // Mobilde gizle
+          }}>
+            <Typography variant="caption" sx={{
+              color: 'rgba(255,255,255,0.7)',
+              display: 'flex',
+              alignItems: 'center',
+              fontSize: '0.65rem'
             }}>
-              {/* Başlık Kısmı */}
-              <Box sx={{
-                display: 'flex',
-                justifyContent: 'space-between',
-                alignItems: 'center',
-                width: '100%',
-                mb: 2
-              }}>
-                <Typography variant="h6" component="div">
-                  <Box component="span" sx={{ color: blueOriginColors.lightBlue }}>BLUE</Box> ORIGIN LAUNCH SIMULATOR
+              <ScienceIcon fontSize="inherit" sx={{ mr: 0.5 }} />
+              NS-13 Flight | BODDL-TP Program
+            </Typography>
+          </Box>
+
+          {/* Orta - Ana başlık (mevcut) */}
+          <Typography variant="h6" component="div" sx={{ 
+            textAlign: 'center',
+            flexGrow: 1 
+          }}>
+            <Box component="span" sx={{ color: blueOriginColors.lightBlue }}>BLUE</Box> ORIGIN LAUNCH SIMULATOR
+          </Typography>
+
+          {/* Sağ taraf - Analist bilgisi */}
+          <Typography variant="caption" sx={{
+            position: 'absolute',
+            right: 0,
+            top: '50%',
+            transform: 'translateY(-50%)',
+            color: 'rgba(255,255,255,0.6)',
+            fontSize: '0.65rem',
+            display: { xs: 'none', md: 'block' } // Küçük ekranlarda gizle
+          }}>
+            Çağrı ÇIBUK
+          </Typography>
+        </Box>
+
+        {/* MEVCUT: Hız kontrolleri ve Launch butonu */}
+        <Box sx={{
+          display: 'flex',
+          justifyContent: 'flex-end', // Sağa yasla
+          width: '100%',
+          mb: 2
+        }}>
+          <Box sx={{ display: 'flex', gap: 1 }}>
+            <ButtonGroup variant="contained" size="medium">
+              <Button 
+                onClick={() => handleSpeedChange(1)} 
+                sx={{
+                  bgcolor: simulationSpeed === 1 ? blueOriginColors.mediumBlue : blueOriginColors.darkBlue,
+                  '&:hover': { bgcolor: blueOriginColors.mediumBlue }
+                }}
+              >
+                1x
+              </Button>
+              <Button 
+                onClick={() => handleSpeedChange(2)} 
+                sx={{
+                  bgcolor: simulationSpeed === 2 ? blueOriginColors.mediumBlue : blueOriginColors.darkBlue,
+                  '&:hover': { bgcolor: blueOriginColors.mediumBlue }
+                }}
+              >
+                2x
+              </Button>
+              <Button 
+                onClick={() => handleSpeedChange(4)} 
+                sx={{
+                  bgcolor: simulationSpeed === 4 ? blueOriginColors.mediumBlue : blueOriginColors.darkBlue,
+                  '&:hover': { bgcolor: blueOriginColors.mediumBlue }
+                }}
+              >
+                4x
+              </Button>
+            </ButtonGroup>
+            <Button
+              onClick={startSimulation}
+              disabled={isSimulationRunning}
+              variant="contained"
+              size="medium"
+              sx={{
+                bgcolor: blueOriginColors.lightBlue,
+                '&:hover': { bgcolor: blueOriginColors.mediumBlue },
+                minWidth: '120px'
+              }}
+            >
+              {isSimulationRunning ? 'Running...' : 'Launch'}
+            </Button>
+          </Box>
+        </Box>
+
+        {/* MEVCUT: Metrik kartları */}
+        <Box sx={{
+          display: 'flex',
+          gap: 1,
+          width: '100%',
+          flexWrap: 'wrap'
+        }}>
+          <Card sx={{
+            flex: '1 1 200px',
+            minWidth: '120px',
+            height: '8vh',
+            background: 'rgba(0,0,0,0.3)'
+          }}>
+            <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
+              <Typography variant="overline" color="white">
+                Velocity
+              </Typography>
+              <Typography variant="h5" color="primary">
+                {currentVelocity.toFixed(2)} m/s
+              </Typography>
+            </CardContent>
+          </Card>
+
+          <Card sx={{
+            flex: '1 1 200px',
+            minWidth: '120px',
+            height: '8vh',
+            background: 'rgba(0,0,0,0.3)'
+          }}>
+            <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
+              <Typography variant="overline" color="white">
+                Altitude
+              </Typography>
+              <Typography variant="h5" color="primary">
+                {currentAltitude.toFixed(2)} m
+              </Typography>
+            </CardContent>
+          </Card>
+
+          <Card sx={{
+            flex: '1 1 200px',
+            minWidth: '120px',
+            height: '8vh',
+            background: 'rgba(0,0,0,0.3)'
+          }}>
+            <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
+              <Typography variant="overline" color="white">
+                Timer
+              </Typography>
+              <Typography variant="h5" color="primary">
+                {countdown}
+              </Typography>
+            </CardContent>
+          </Card>
+
+          {currentEvent && (
+            <Card sx={{
+              flex: '1 1 300px',
+              minWidth: '200px',
+              height: '8vh',
+              borderLeft: `4px solid ${blueOriginColors.lightBlue}`,
+              background: `linear-gradient(90deg, rgba(11,61,145,0.2) 0%, rgba(11,61,145,0.1) 100%)`
+            }}>
+              <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
+                <Typography variant="overline" color="white">
+                  Current Event
                 </Typography>
-
-                {/* Hız Kontrolleri ve Launch Butonu */}
-                <Box sx={{ display: 'flex', gap: 1 }}>
-                  <ButtonGroup variant="contained" size="medium">
-                    <Button
-                      onClick={() => handleSpeedChange(1)}
-                      sx={{
-                        bgcolor: simulationSpeed === 1 ? blueOriginColors.mediumBlue : blueOriginColors.darkBlue,
-                        '&:hover': { bgcolor: blueOriginColors.mediumBlue }
-                      }}
-                    >
-                      1x
-                    </Button>
-                    <Button
-                      onClick={() => handleSpeedChange(2)}
-                      sx={{
-                        bgcolor: simulationSpeed === 2 ? blueOriginColors.mediumBlue : blueOriginColors.darkBlue,
-                        '&:hover': { bgcolor: blueOriginColors.mediumBlue }
-                      }}
-                    >
-                      2x
-                    </Button>
-                    <Button
-                      onClick={() => handleSpeedChange(4)}
-                      sx={{
-                        bgcolor: simulationSpeed === 4 ? blueOriginColors.mediumBlue : blueOriginColors.darkBlue,
-                        '&:hover': { bgcolor: blueOriginColors.mediumBlue }
-                      }}
-                    >
-                      4x
-                    </Button>
-                  </ButtonGroup>
-                  <Button
-                    onClick={startSimulation}
-                    disabled={isSimulationRunning}
-                    variant="contained"
-                    size="medium"
-                    sx={{
-                      bgcolor: blueOriginColors.lightBlue,
-                      '&:hover': { bgcolor: blueOriginColors.mediumBlue },
-                      minWidth: '120px'
-                    }}
-                  >
-                    {isSimulationRunning ? 'Running...' : 'Launch'}
-                  </Button>
-                </Box>
-              </Box>
-
-              {/* Metrikler Kısmı */}
-              <Box sx={{
-                display: 'flex',
-                gap: 2,
-                width: '100%',
-                flexWrap: 'wrap'
-              }}>
-                <Card sx={{
-                  flex: '1 1 200px',
-                  minWidth: '120px',
-                  height: '8vh',
-                  background: 'rgba(0,0,0,0.3)'
-                }}>
-                  <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
-                    <Typography variant="overline" color="white">
-                      Velocity
-                    </Typography>
-                    <Typography variant="h5" color="primary">
-                      {currentVelocity.toFixed(2)} m/s
-                    </Typography>
-                  </CardContent>
-                </Card>
-
-                <Card sx={{
-                  flex: '1 1 200px',
-                  minWidth: '120px',
-                  height: '8vh',
-                  background: 'rgba(0,0,0,0.3)'
-                }}>
-                  <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
-                    <Typography variant="overline" color="white">
-                      Altitude
-                    </Typography>
-                    <Typography variant="h5" color="primary">
-                      {currentAltitude.toFixed(2)} m
-                    </Typography>
-                  </CardContent>
-                </Card>
-
-                <Card sx={{
-                  flex: '1 1 200px',
-                  minWidth: '120px',
-                  height: '8vh',
-                  background: 'rgba(0,0,0,0.3)'
-
-                }}>
-                  <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
-                    <Typography variant="overline" color="white">
-                      Timer
-                    </Typography>
-                    <Typography variant="h5" color="primary">
-                      {countdown}
-                    </Typography>
-                  </CardContent>
-                </Card>
-
-                {currentEvent && (
-                  <Card sx={{
-                    flex: '1 1 300px',
-                    minWidth: '200px',
-                    height: '8vh',
-                    borderLeft: `4px solid ${blueOriginColors.lightBlue}`,
-                    background: `linear-gradient(90deg, rgba(11,61,145,0.2) 0%, rgba(11,61,145,0.1) 100%)`
-                  }}>
-                    <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
-                      <Typography variant="overline" color="white">
-                        Current Event
-                      </Typography>
-                      <Typography variant="h5" color='#FFFF00'>
-                        {currentEvent.name}
-                      </Typography>
-                    </CardContent>
-                  </Card>
-                )}
-              </Box>
-            </Toolbar>
-          </AppBar>
+                <Typography variant="h5" color="#FFFF00">
+                  {currentEvent.name}
+                </Typography>
+              </CardContent>
+            </Card>
+          )}
+        </Box>
+      </Toolbar>
+    </AppBar>
 
 
 
@@ -393,7 +437,7 @@ function App() {
             {/* Timeline */}
             <Grid item xs={1}>
               <Paper elevation={7} sx={{
-                height: '80vh',
+                height: '75vh',
                 backgroundColor: blueOriginColors.darkGray,
 
                 p: 1,
